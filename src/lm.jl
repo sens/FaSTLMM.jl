@@ -1,11 +1,14 @@
+#############################################################
+# Functions to perform linear regression with one response
+#############################################################
 #
-# function to perform linear regression in one variable
-#
-# y = outcome
+# Notation:
+# y = response
 # X = design matrix
 #
-# this function should work for matrix-valued y
+# Functions should work for matrix-valued y
 
+# Uses elementary operators
 function lm0(y,X)
     xx = X'X
     xy = X'y
@@ -13,7 +16,7 @@ function lm0(y,X)
     return b
 end
 
-
+# Uses specialized function for multiplying transposed matrix
 function lm1(y,X)
     xx = At_mul_B(X, X) 
     xy = At_mul_B(X, y) 
@@ -21,7 +24,7 @@ function lm1(y,X)
     return b
 end
 
-
+# Uses QR decomposition, multiplication function
 function lm2(y,X)
     (q,r) = qr(X)
     y = At_mul_B(q,y)
@@ -31,6 +34,7 @@ function lm2(y,X)
     return b
 end
 
+# Uses QR decomposition and uses R matrix directly
 function lm3(y,X)
     (q,r) = qr(X)
     y = At_mul_B(q,y)
