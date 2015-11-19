@@ -12,11 +12,13 @@
 #
 # ################################################################
 
-using Base.LinAlg.LAPACK
-
 # y = phenotype matrix
 # X = predictor matrix
 # K = kinship matrix, expected to be symmetric and positive definite
+
+# ################################################################
+# function to rotate the data with respect to the kinship matrix
+# ################################################################
 
 function rotateData(y,X,K)
     # check dimensions
@@ -28,21 +30,51 @@ function rotateData(y,X,K)
     end
 
     # check symmetry and positive definiteness of K
-    if( !issymm(K) )
+    if( !issym(K) )
         error("K is not symmetric.")
     elseif( !isposdef(K) )
         error("K is not positive definite.")
     end
 
     # spectral decomposition of a symmetric matrix
-    # this rewrites the K matrix, so need to check what to do
-    # allocate future eigenvector matrix to kinship matrix
-    U = K
-    S = syev!(jobz='N',uplo='U',U);
+    EF = eigfact(K)
 
     # return rotated phenotype, covariates, and eigenvalues
-    return U'y, U'X, S
+    return EF[:vectors]'y, EF[:vectors]'X, EF[:values]
     
 end
 
 
+# ################################################################
+# function to perform weighted least squares estimation
+# ################################################################
+
+# y = outcome
+# X = predictors
+# w = weights (should be positive)
+
+function wls(y,X,w)
+
+    sqrtw = sqrt(w)
+    y = diagm(sqrtw)*y
+    X = diagm(sqrtw)*X
+
+    (q,r) = qr(X)
+    y = At_mul_B(q,y)
+    b = r\y
+
+    yhat = X*b
+    rss = norm(y-yhat)^2
+    
+    return b, rss
+    
+end
+
+# ################################################################
+# function to estimate error variance
+# ################################################################
+
+
+# ################################################################
+# function to estimate heritability
+# ################################################################
