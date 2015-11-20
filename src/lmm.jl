@@ -41,7 +41,7 @@ function rotateData(y,X,K)
 
     # return rotated phenotype, covariates, and eigenvalues
     return EF[:vectors]'y, EF[:vectors]'X, EF[:values]
-    
+
 end
 
 
@@ -53,28 +53,40 @@ end
 # X = predictors
 # w = weights (should be positive)
 
+# the variance estimate is maximum likelihood
+
 function wls(y,X,w)
 
+    # number ofindividuals
+    n = size(y,1)
+
+    # square root of the weights
     sqrtw = sqrt(w)
-    y = diagm(sqrtw)*y
-    X = diagm(sqrtw)*X
+    # scale by weights
+    yy = diagm(sqrtw)*y
+    XX = diagm(sqrtw)*X
 
-    (q,r) = qr(X)
-    y = At_mul_B(q,y)
-    b = r\y
+    # QR decomposition of the transformed data
+    (q,r) = qr(XX)
+    yy = At_mul_B(q,yy)
+    b = r\yy
 
-    yhat = X*b
-    rss = norm(y-yhat)^2
-    
-    return b, rss
-    
+    yyhat = XX*b
+    rss = norm(yy-yyhat)^2
+
+    return b, rss/n
+
 end
 
 # ################################################################
-# function to estimate error variance
+# function to calculate log likelihood of data given fixed effects
 # ################################################################
 
 
+
 # ################################################################
-# function to estimate heritability
+# function to estimate heritability given fixed effects
 # ################################################################
+
+
+

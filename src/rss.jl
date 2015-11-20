@@ -20,8 +20,8 @@ end
 
 # Uses specialized function for multiplying transposed matrix
 function rss1(y,X)
-    xx = At_mul_B(X, X) 
-    xy = At_mul_B(X, y) 
+    xx = At_mul_B(X, X)
+    xy = At_mul_B(X, y)
     b = xx\xy
     yhat = X*b
     rss = norm(y-yhat)^2
@@ -31,7 +31,7 @@ end
 # Uses QR decomposition, multiplication function
 function rss2(y,X)
     (q,r) = qr(X)
-    xy = At_mul_B(q,y) 
+    xy = At_mul_B(q,y)
     b = r\xy
     yhat = X*b
     rss = norm(y-yhat)^2
@@ -63,4 +63,10 @@ function rss5(y,X)
     d = size(zz,1)
     rss = c[d,d]^2
     return rss
+end
+
+#
+
+function rss6(y,X)
+
 end
