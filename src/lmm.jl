@@ -12,13 +12,13 @@
 #
 # ################################################################
 
-# y = phenotype matrix
-# X = predictor matrix
-# K = kinship matrix, expected to be symmetric and positive definite
+"""
+rotateData: Rotates data with respect to the kinship matrix
 
-# ################################################################
-# function to rotate the data with respect to the kinship matrix
-# ################################################################
+    y = phenotype matrix
+    X = predictor matrix
+    K = kinship matrix, expected to be symmetric and positive definite
+"""
 
 function rotateData(y,X,K)
     # check dimensions
@@ -45,15 +45,16 @@ function rotateData(y,X,K)
 end
 
 
-# ################################################################
-# function to perform weighted least squares estimation
-# ################################################################
 
-# y = outcome
-# X = predictors
-# w = weights (should be positive)
+"""
+wls: Weighted least squares estimation
 
-# the variance estimate is maximum likelihood
+    y = outcome
+    X = predictors
+    w = weights (should be positive)
+
+The variance estimate is maximum likelihood
+"""
 
 function wls(y,X,w)
 
@@ -71,9 +72,11 @@ function wls(y,X,w)
     yy = At_mul_B(q,yy)
     b = r\yy
 
+    # estimate y and calculate rss
     yyhat = XX*b
     rss = norm(yy-yyhat)^2
 
+    # return coefficient and variance estimate
     return b, rss/n
 
 end
