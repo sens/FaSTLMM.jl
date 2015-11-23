@@ -21,18 +21,19 @@ rotateData: Rotates data with respect to the kinship matrix
 """
 
 function rotateData(y,X,K)
+
     # check dimensions
     n = size(y,1)
-    if( size(X,1) != n )
-        error("Dimension mismatch.")
-    elseif( size(K,1) != n )
+    if( ( size(X,1) != n ) | ( size(K,1) != n ))
         error("Dimension mismatch.")
     end
 
     # check symmetry and positive definiteness of K
-    if( !issym(K) )
+    if( !(issym(K)) )
         error("K is not symmetric.")
-    elseif( !isposdef(K) )
+    end
+
+    if( !(isposdef(K)) )
         error("K is not positive definite.")
     end
 
@@ -77,19 +78,42 @@ function wls(y,X,w)
     rss = norm(yy-yyhat)^2
 
     # return coefficient and variance estimate
-    return b, rss/n
+    return b, rss
 
 end
 
 # ################################################################
 # function to calculate log likelihood of data given fixed effects
 # ################################################################
-
-
+"""
+logLik: log likelihood of data
+"""
+function logLik(sigma2,h2,y,X,d)
+    # weights
+    w =sigma2( h2*d + (1-h2) )
+    sqrtw = sqrt(w)
+    # get normal pdfs
+    lp =logpdf(Normal(),(y-hyat)/sqrtw)-log(sqrtw)
+    # sum to get log likelihood
+    return sum(lp)
+end
 
 # ################################################################
 # function to estimate heritability given fixed effects
 # ################################################################
+
+"""
+estVarComp: estimate variance components
+"""
+
+function estVarComp(sigma2,h2,y,X,d)
+
+    function logLik0(sigma2,h2)
+        logLik(sigma2,h2,y,X,d)
+    end
+
+    optimize(logLik0,[1 0.01],method = :l_bfgs)
+end
 
 
 
