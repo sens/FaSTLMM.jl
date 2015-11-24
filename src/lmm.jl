@@ -20,7 +20,8 @@ rotateData: Rotates data with respect to the kinship matrix
     K = kinship matrix, expected to be symmetric and positive definite
 """
 
-function rotateData(y,X,K)
+function rotateData(y::Array{Float64,2},X::Array{Float64,2},
+                    K::Array{Float64,2})
 
     # check dimensions
     n = size(y,1)
@@ -50,20 +51,20 @@ end
 """
 wls: Weighted least squares estimation
 
-    y = outcome
-    X = predictors
-    w = weights (should be positive)
+    y = outcome, matrix
+    X = predictors, matrix
+    w = weights (should be positive), one-dim vector
 
 The variance estimate is maximum likelihood
 """
 
-function wls(y,X,w)
+function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
 
     # number ofindividuals
     n = size(y,1)
 
     # square root of the weights
-    sqrtw = sqrt(w[:,1])
+    sqrtw = sqrt(w)
     # scale by weights
     yy = diagm(sqrtw)*y
     XX = diagm(sqrtw)*X
@@ -75,7 +76,7 @@ function wls(y,X,w)
 
     # estimate y and calculate rss
     yhat = X*b
-    rss = norm((y-yhat)./sqrtw)^2
+    rss = sum((diagm(1./sqrtw)*(y-yhat)).^2,1)
 
     # return coefficient and variance estimate
     return b, rss
