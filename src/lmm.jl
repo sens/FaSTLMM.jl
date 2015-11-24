@@ -63,7 +63,7 @@ function wls(y,X,w)
     n = size(y,1)
 
     # square root of the weights
-    sqrtw = sqrt(w)
+    sqrtw = sqrt(w[:,1])
     # scale by weights
     yy = diagm(sqrtw)*y
     XX = diagm(sqrtw)*X
@@ -74,8 +74,8 @@ function wls(y,X,w)
     b = r\yy
 
     # estimate y and calculate rss
-    yyhat = XX*b
-    rss = norm(yy-yyhat)^2
+    yhat = X*b
+    rss = norm((y-yhat)./sqrtw)^2
 
     # return coefficient and variance estimate
     return b, rss
@@ -106,13 +106,13 @@ end
 estVarComp: estimate variance components
 """
 
-function estVarComp(sigma2,h2,y,X,d)
+function estVarComp(y,X,d)
 
     function logLik0(sigma2,h2)
         logLik(sigma2,h2,y,X,d)
     end
 
-    optimize(logLik0,[1 0.01],method = :l_bfgs)
+    optimize(logLik0,[1, 0.01],method = :l_bfgs)
 end
 
 
