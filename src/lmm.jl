@@ -138,5 +138,4 @@ end
 
 function lmm( y::Array{Float64,2}, X::Array{Float64,2},
                     d::Array{Float64,1},logsigma2::Float64,logith2::Float64)
-                    )
 
