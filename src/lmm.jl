@@ -60,7 +60,7 @@ The variance estimate is maximum likelihood
 
 function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
 
-    # number ofindividuals
+    # number of individuals
     n = size(y,1)
 
     # square root of the weights
@@ -83,9 +83,15 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
 
 end
 
-function invlogit(x::Float64)
-    exp(x)/(1+exp(x))
-end
+############################################
+# inverse logit function
+############################################
+"""
+invlogit: inverse of the logit function
+"""
+invlogit(x::Float64) = exp(x)/(1+exp(x))
+
+
     
 # ################################################################
 # function to calculate log likelihood of data given fixed effects
@@ -96,17 +102,23 @@ logLik: log likelihood of data
 function logLik(logsigma2::Float64,logith2::Float64,
                 y::Array{Float64,2},
                 X::Array{Float64,2},
-                d::Array{Float64,1})
+                d::Array{Float64,1},
+                reml::Bool)
     # weights
     w =exp(logsigma2) * ( invlogit(logith2)*d + (1-invlogit(logith2)) )
 
+    # calculate coefficients and rss from weighted least squares
     (b,rss) = wls(y,X,w)
     yhat = X*b
     sqrtw = sqrt(w)
 
     n = size(w,1)
-    # get normal pdfs
-    lp = -rss/2 - 0.5 * sum(log(w)) 
+    if( reml )
+        lp = 0
+    else
+        # get normal pdfs
+        lp = -rss/2 - 0.5 * sum(log(w))
+    end
     # sum to get log likelihood
     return lp[1,1]
 end
