@@ -12,6 +12,10 @@
 #
 # ################################################################
 
+##################################################################
+# rotateData: rotate by orthogonal transformation
+##################################################################
+
 """
 rotateData: Rotates data with respect to the kinship matrix
 
@@ -46,7 +50,9 @@ function rotateData(y::Array{Float64,2},X::Array{Float64,2},
 
 end
 
-
+##################################################################
+# wls: weighted least squares        
+##################################################################        
 
 """
 wls: Weighted least squares estimation
@@ -79,7 +85,7 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
     rss = sum((diagm(1./sqrtw)*(y-yhat)).^2,1)
 
     # return coefficient and variance estimate
-    return b, rss
+    return b, rss/n
 
 end
 
@@ -91,6 +97,13 @@ invlogit: inverse of the logit function
 """
 invlogit(x::Float64) = exp(x)/(1+exp(x))
 
+############################################
+# logit function
+############################################
+"""
+logit: logit function
+"""
+logit(x::Float64) = log(x/(1-x))
 
     
 # ################################################################
@@ -123,6 +136,7 @@ function logLik(logsigma2::Float64,logith2::Float64,
     return lp[1,1]
 end
 
+    
 ##################################################################
 # function to estimate variance components and heritability
 ##################################################################
@@ -137,7 +151,7 @@ function estVarComp(y::Array{Float64,2},
                     d::Array{Float64,1},logsigma2::Float64,logith2::Float64)
 
     function logLik0(z::Array{Float64,1})
-        -logLik(z[1],z[2],y,X,d)
+        -logLik(z[1],z[2],y,X,d,false)
     end
 
     est = optimize(logLik0,[logsigma2,logith2])
@@ -148,6 +162,7 @@ end
 # function to fit mixed model
 ##################################################################
 
+#=
 function lmm( y::Array{Float64,2}, X::Array{Float64,2},
                     d::Array{Float64,1},logsigma2::Float64,logith2::Float64)
-
+=#
