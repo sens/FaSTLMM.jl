@@ -69,6 +69,10 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
     # number of individuals
     n = size(y,1)
 
+    # check if weights are positive
+    if(any(w<=0))
+        error("Some weights are not positive.")
+    end
     # square root of the weights
     sqrtw = sqrt(w)
     # scale by weights
@@ -111,6 +115,11 @@ logit(x::Float64) = log(x/(1-x))
 # ################################################################
 """
 logLik: log likelihood of data
+
+logsigma2 = log of error variance component
+y = matrix of phenotypes
+X = matrix of covariates for fixed effects
+d = eigenvalues of spectral decomposition
 """
 function logLik(logsigma2::Float64,logith2::Float64,
                 y::Array{Float64,2},
@@ -118,7 +127,7 @@ function logLik(logsigma2::Float64,logith2::Float64,
                 d::Array{Float64,1},
                 reml::Bool)
     # weights
-    w =exp(logsigma2) * ( invlogit(logith2)*d + (1-invlogit(logith2)) )
+    w = exp(logsigma2) * ( invlogit(logith2)*d + (1-invlogit(logith2)) )
 
     # calculate coefficients and rss from weighted least squares
     (b,rss) = wls(y,X,w)
