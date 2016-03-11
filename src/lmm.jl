@@ -19,9 +19,9 @@
 """
 rotateData: Rotates data with respect to the kinship matrix
 
-    y = phenotype matrix
-    X = predictor matrix
-    K = kinship matrix, expected to be symmetric and positive definite
+y = phenotype matrix
+X = predictor matrix
+K = kinship matrix, expected to be symmetric and positive definite
 """
 
 function rotateData(y::Array{Float64,2},X::Array{Float64,2},
@@ -57,26 +57,30 @@ end
 """
 wls: Weighted least squares estimation
 
-    y = outcome, matrix
-    X = predictors, matrix
-    w = weights (should be positive), one-dim vector
+y = outcome, matrix
+X = predictors, matrix
+w = weights (should be positive), one-dim vector
 
 The variance estimate is maximum likelihood
 """
 
-function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
+function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
+             reml::Bool=false)
 
     # number of individuals
     n = size(y,1)
-
+    # number of covariates
+    p = size(X,2)
+    
     # check if weights are positive
-    if(any(w<=0))
+    if(any(w.<=.0))
         error("Some weights are not positive.")
     end
+        
     # square root of the weights
     sqrtw = sqrt(w)
     # scale by weights
-    yy = diagm(sqrtw)*y
+    yy = y.*sqrtw
     XX = diagm(sqrtw)*X
 
     # QR decomposition of the transformed data
@@ -86,10 +90,16 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1})
 
     # estimate y and calculate rss
     yhat = X*b
-    rss = sum((diagm(1./sqrtw)*(y-yhat)).^2,1)
+    rss = sum(((y-yhat)./sqrtw).^2)
 
+    if( reml )        
+        sigma2 = rss/(n-p)
+    else
+        sigma2 = rss/n
+    end
+        
     # return coefficient and variance estimate
-    return b, rss/n
+    return b, sigma2
 
 end
 
