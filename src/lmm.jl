@@ -65,7 +65,7 @@ The variance estimate is maximum likelihood
 """
 
 function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
-             reml::Bool=false)
+             reml::Bool=false,resid=false)
 
     # number of individuals
     n = size(y,1)
@@ -99,8 +99,13 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
         
     # return coefficient and variance estimate
-    return b, sigma2
-
+    if(resid)
+        yhat = X*b
+        r = y - yhat
+        return b, sigma2, r
+    else
+        return b, sigma2
+    end
 end
 
 ############################################
@@ -131,26 +136,21 @@ y = matrix of phenotypes
 X = matrix of covariates for fixed effects
 d = eigenvalues of spectral decomposition
 """
-function logLik(logsigma2::Float64,logith2::Float64,
+function logLik(logsigma2::Float64,h2::Float64,
                 y::Array{Float64,2},
                 X::Array{Float64,2},
-                d::Array{Float64,1},
-                reml::Bool)
+                lambda::Array{Float64,1})
     # weights
-    w = exp(logsigma2) * ( invlogit(logith2)*d + (1-invlogit(logith2)) )
+    w = h2*lambda + (1-h2)
 
     # calculate coefficients and rss from weighted least squares
-    (b,rss) = wls(y,X,w)
-    yhat = X*b
+    (b,sigma2,r) = wls(y,X,w,false,true)
     sqrtw = sqrt(w)
-
+    rss = sum((r./w).^2)
+    
     n = size(w,1)
-    if( reml )
-        lp = 0
-    else
-        # get normal pdfs
-        lp = -rss/2 - 0.5 * sum(log(w))
-    end
+    # get normal pdfs
+    lp =  - 0.5 * rss/sigma2 - sum(log(w)) - (n/2)*log(sigma2)
     # sum to get log likelihood
     return lp[1,1]
 end
