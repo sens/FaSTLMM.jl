@@ -118,23 +118,7 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
 end
 
-############################################
-# inverse logit function
-############################################
-"""
-invlogit: inverse of the logit function
-"""
-invlogit(x::Float64) = exp(x)/(1+exp(x))
-
-############################################
-# logit function
-############################################
-"""
-logit: logit function
-"""
-logit(x::Float64) = log(x/(1-x))
-
-    
+  
 ##################################################################
 # function to estimate variance components and heritability
 ##################################################################
