@@ -59,7 +59,8 @@ wls: Weighted least squares estimation
 
 y = outcome, matrix
 X = predictors, matrix
-w = weights (should be positive), one-dim vector
+w = weights (should be positive, and proportional to inverse of 
+    variance), one-dim vector
 
 The variance estimate is maximum likelihood
 """
@@ -88,9 +89,9 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     yy = At_mul_B(q,yy)
     b = r\yy
 
-    # estimate y and calculate rss
-    yhat = X*b
-    rss = sum(((y-yhat)./sqrtw).^2)
+    # estimate yy and calculate rss
+    yyhat = XX*b
+    rss = sum((yy-yyhat).^2)
 
     if( reml )        
         sigma2 = rss/(n-p)
@@ -99,10 +100,13 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
         
     # return coefficient and variance estimate
-    if(resid)
-        yhat = X*b
-        r = y - yhat
-        return b, sigma2, r
+    if(loglik)
+        logdetSigma = n*log(sigma2) + sum(log(w))
+        ell = -0.5 * ( logdetSigma + rss/sigma2 )
+        if ( reml )
+            ell += - log(det(r))
+        end
+        return b, sigma2, ell
     else
         return b, sigma2
     end
