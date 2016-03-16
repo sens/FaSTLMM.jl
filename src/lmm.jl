@@ -33,14 +33,14 @@ function rotateData(y::Array{Float64,2},X::Array{Float64,2},
         error("Dimension mismatch.")
     end
 
-    # check symmetry and positive definiteness of K
-    if( !(issym(K)) )
-        error("K is not symmetric.")
-    end
+#    # check symmetry and positive definiteness of K
+#    if( !(issym(K)) )
+#        error("K is not symmetric.")
+#    end
 
-    if( !(isposdef(K)) )
-        error("K is not positive definite.")
-    end
+#    if( !(isposdef(K)) )
+#        error("K is not positive definite.")
+#    end
 
     # spectral decomposition of a symmetric matrix
     EF = eigfact(K)
@@ -54,6 +54,13 @@ end
 # wls: weighted least squares        
 ##################################################################        
 
+type Wls
+    b::Array{Float64,2}
+    sigma2::Float64
+    ell::Float64
+end
+            
+            
 """
 wls: Weighted least squares estimation
 
@@ -66,7 +73,7 @@ The variance estimate is maximum likelihood
 """
 
 function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
-             reml::Bool=false,resid=false)
+             reml::Bool=false,loglik=false)
 
     # number of individuals
     n = size(y,1)
@@ -84,11 +91,10 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     yy = y.*sqrtw
     XX = diagm(sqrtw)*X
 
+        
     # QR decomposition of the transformed data
     (q,r) = qr(XX)
-    yy = At_mul_B(q,yy)
-    b = r\yy
-
+    b = r\At_mul_B(q,yy)
     # estimate yy and calculate rss
     yyhat = XX*b
     rss = sum((yy-yyhat).^2)
@@ -101,12 +107,12 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
         
     # return coefficient and variance estimate
     if(loglik)
-        logdetSigma = n*log(sigma2) + sum(log(w))
+        logdetSigma = n*log(sigma2) - sum(log(w))
         ell = -0.5 * ( logdetSigma + rss/sigma2 )
         if ( reml )
             ell += - log(det(r))
         end
-        return b, sigma2, ell
+        return Wls(b,sigma2,ell)
     else
         return b, sigma2
     end
