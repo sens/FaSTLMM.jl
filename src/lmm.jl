@@ -135,37 +135,6 @@ logit: logit function
 logit(x::Float64) = log(x/(1-x))
 
     
-# ################################################################
-# function to calculate log likelihood of data given fixed effects
-# ################################################################
-"""
-logLik: log likelihood of data
-
-logsigma2 = log of error variance component
-y = matrix of phenotypes
-X = matrix of covariates for fixed effects
-d = eigenvalues of spectral decomposition
-"""
-function logLik(logsigma2::Float64,h2::Float64,
-                y::Array{Float64,2},
-                X::Array{Float64,2},
-                lambda::Array{Float64,1})
-    # weights
-    w = h2*lambda + (1-h2)
-
-    # calculate coefficients and rss from weighted least squares
-    (b,sigma2,r) = wls(y,X,w,false,true)
-    sqrtw = sqrt(w)
-    rss = sum((r./w).^2)
-    
-    n = size(w,1)
-    # get normal pdfs
-    lp =  - 0.5 * rss/sigma2 - sum(log(w)) - (n/2)*log(sigma2)
-    # sum to get log likelihood
-    return lp[1,1]
-end
-
-    
 ##################################################################
 # function to estimate variance components and heritability
 ##################################################################
