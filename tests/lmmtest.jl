@@ -69,3 +69,5 @@ end
 
 
 plot(x=p,y=loglik,Geom.line)
+
+@time estVarComp(yy,XX,dd,false)

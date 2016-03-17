@@ -126,18 +126,18 @@ end
 """
 estVarComp: estimate variance components
 """
-
-
+        
 function estVarComp(y::Array{Float64,2},
                     X::Array{Float64,2},
-                    d::Array{Float64,1},logsigma2::Float64,logith2::Float64)
+                    lambda::Array{Float64,1},
+                    reml::Bool=false)
 
-    function logLik0(z::Array{Float64,1})
-        -logLik(z[1],z[2],y,X,d,false)
+    function logLik0(h2::Float64)
+        -wls(y,X,1./(h2*lambda+(1-h2)),reml,true).ell
     end
 
-    est = optimize(logLik0,[logsigma2,logith2])
-    return exp(est.minimum[1]) , invlogit(est.minimum[2])
+    est = optimize(logLik0,0,1)
+    return est.minimum
 end
 
 ##################################################################
