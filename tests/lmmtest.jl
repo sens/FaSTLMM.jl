@@ -1,41 +1,11 @@
 using Distributions
 using Distances
 using Optim
+using DataArrays
 
 # include the function
 include("../src/lmm.jl")
 
-# make a random kinship matrix
-
-N = 1000
-M = 500
-P = 2
-
-# random genotypes
-g = rand( Binomial(1,0.5), (N,M) );
-# calculate pairwise distances
-d = pairwise( Cityblock(),g' );
-# calculate kinship
-K = 1-d/(M);
-
-e = 2* rand( Normal(), (N,1) );
-X = rand( Normal(), (N,2) );
-beta =[2 3]';
-
-X = [ones(div(N,2),1);zeros(div(N,2),1)];
-w = 1 + 9*X;
-e = e.*sqrt(w[:,1]);
-X = [ones(N,1) X];
-y = X*beta + e;
-wls(y,X,w[:])
-
-(yy,XX,dd) =rotateData(y,X,K);
-estVarComp(yy,XX,dd,log(var(y)),0.0)
-
-##############
-
-using DataFrames
-using DataArrays
 
 K = readtable("../data/kinship.csv");
 K = K[2:size(K,2)];
