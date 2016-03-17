@@ -66,8 +66,7 @@ wls: Weighted least squares estimation
 
 y = outcome, matrix
 X = predictors, matrix
-w = weights (should be positive, and proportional to inverse of 
-    variance), one-dim vector
+w = weights (positive, inversely proportional to variance), one-dim vector
 
 The variance estimate is maximum likelihood
 """
@@ -118,7 +117,6 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
 end
 
-  
 ##################################################################
 # function to estimate variance components and heritability
 ##################################################################
