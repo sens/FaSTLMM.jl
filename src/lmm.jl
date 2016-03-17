@@ -87,62 +87,63 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     # square root of the weights
     sqrtw = sqrt(w)
     # scale by weights
-    yy = y.*sqrtw
-    XX = diagm(sqrtw)*X
-
+    # yy = y.*sqrtw
+    yy = scale(sqrtw,y)
+    # XX = diagm(sqrtw)*X
+    XX = scale(sqrtw,X)
         
     # QR decomposition of the transformed data
     (q,r) = qr(XX)
     b = r\At_mul_B(q,yy)
     # estimate yy and calculate rss
     yyhat = XX*b
-    rss = sum((yy-yyhat).^2)
+    # yyhat = q*At_mul_B(q,yy)
+    rss = norm((yy-yyhat))^2
 
     if( reml )        
         sigma2 = rss/(n-p)
     else
         sigma2 = rss/n
     end
-        
+
     # return coefficient and variance estimate
-    if(loglik)
-        logdetSigma = n*log(sigma2) - sum(log(w))
-        ell = -0.5 * ( logdetSigma + rss/sigma2 )
-        if ( reml )
-            ell += - log(det(r))
-        end
-        return Wls(b,sigma2,ell)
-    else
-        return b, sigma2
+    logdetSigma = n*log(sigma2) - sum(log(w))
+    ell = -0.5 * ( logdetSigma + rss/sigma2 )
+    if ( reml )
+        ell -=  log(abs(det(r)))
     end
+
+    return Wls(b,sigma2,ell)
+        
 end
 
 ##################################################################
-# function to estimate variance components and heritability
+# function to fit linear mixed model by optimizing heritability 
 ##################################################################
 
+type Lmm
+    b::Array{Float64,2}
+    sigma2::Float64
+    h2::Float64
+    ell::Float64
+end            
+        
 """
-estVarComp: estimate variance components
+lmm: fit linear mixed model 
 """
         
-function estVarComp(y::Array{Float64,2},
-                    X::Array{Float64,2},
-                    lambda::Array{Float64,1},
-                    reml::Bool=false)
+function lmm(y::Array{Float64,2},
+             X::Array{Float64,2},
+             lambda::Array{Float64,1},
+             reml::Bool=false)
 
     function logLik0(h2::Float64)
-        -wls(y,X,1./(h2*lambda+(1-h2)),reml,true).ell
+        - wls(y,X,1./(h2*lambda+(1-h2)),reml,true).ell
     end
 
-    est = optimize(logLik0,0,1)
-    return est.minimum
+    opt = optimize(logLik0,0,1)
+    h2 = opt.minimum
+    est = wls(y,X,1./(h2*lambda+(1-h2)),reml,true)
+    return Lmm(est.b,est.sigma2,h2,est.ell)
 end
 
-##################################################################
-# function to fit mixed model
-##################################################################
-
-#=
-function lmm( y::Array{Float64,2}, X::Array{Float64,2},
-                    d::Array{Float64,1},logsigma2::Float64,logith2::Float64)
-=#
