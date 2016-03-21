@@ -23,12 +23,7 @@ covar = DataArray(covar);
 X = convert(Array{Float64,2},covar);
 K = convert(Array{Float64,2},K);
 
-y = Array{Float64}(size(pheno,1),1);
-y[:,1] = convert(Array{Float64,1},pheno[:,1]);
-(yy,XX,dd) = rotateData(y,X,K)
 
-y[:,1] = convert(Array{Float64,1},pheno[:,12]);
-(yy,XX,dd) = rotateData(y,X,K)
 
 
 # NPOINTS = 1000;
@@ -41,11 +36,51 @@ y[:,1] = convert(Array{Float64,1},pheno[:,12]);
 
 # plot(x=p,y=loglik,Geom.line)
 
-@time for j=1:100
+# initialize matrix to store results
+res = Array{Float64}(size(pheno,2)*2,size(covar,2)+4)
+
+# loop through the phenotypes
+for i = 1:size(pheno,2)
+    # keep only those individuals without missing phenotypes
+    whichKeep = !isna(pheno[:,i])
+    y = Array{Float64}(sum(whichKeep),1)
+    y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
+    # perform rotation
+    (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
+                                K[whichKeep,whichKeep])
+    out0 = lmm(yy,XX,lambda,false)
+    out1 = lmm(yy,XX,lambda,true)    
+    res[2*i-1,:] = [out0.b; out0.sigma2; out0.h2; out0.ell; 0]
+    res[2*i,:]   = [out1.b; out1.sigma2; out1.h2; out1.ell; 1]    
+end
+
+cnames =["b0";"b1";"sigma2";"h2";"loglik";"reml"];
+resDF = DataFrame(res);
+names!(resDF,convert(Array{Symbol},cnames));
+writetable("results.csv",resDF);
+
+###################################################################
+
+function microbenchmark(nrep::Int64,f::Function,x...)
+    res = Array{Float64}(nrep)
+
+    for i=1:nrep
+        tic()
+        f(x...)
+        res[i] = toq()
+    end
+    return res
+end
+
+
+function analyzeAllPheno(pheno::DataArray{Real,2},X::Array{Float64,2},
+                         K::Array{Float64,2})
     for i = 1:size(pheno,2)
+        # keep only those individuals without missing phenotypes
         whichKeep = !isna(pheno[:,i])
         y = Array{Float64}(sum(whichKeep),1)
         y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
+        # perform rotation
         (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
                                     K[whichKeep,whichKeep])
         out = lmm(yy,XX,lambda,true)
