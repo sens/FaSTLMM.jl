@@ -55,7 +55,7 @@ end
 # function to fit linear mixed model by optimizing heritability 
 ##################################################################
 
-type Lmm
+type Flmm
     b::Array{Float64,2}
     sigma2::Float64
     h2::Float64
@@ -66,7 +66,7 @@ end
 lmm: fit linear mixed model 
 """
         
-function lmm(y::Array{Float64,2},
+function flmm(y::Array{Float64,2},
              X::Array{Float64,2},
              lambda::Array{Float64,1},
              reml::Bool=false)
@@ -78,6 +78,6 @@ function lmm(y::Array{Float64,2},
     opt = optimize(logLik0,0,1)
     h2 = opt.minimum
     est = wls(y,X,1./(h2*lambda+(1-h2)),reml,true)
-    return Lmm(est.b,est.sigma2,h2,est.ell)
+    return Flmm(est.b,est.sigma2,h2,est.ell)
 end
 
