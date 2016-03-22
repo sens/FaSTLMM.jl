@@ -19,4 +19,4 @@ The linear model is of the familiar form: $$y = X \beta + e$$
 This implementation is my attempt to learn Julia and numerical linear
 algebra.
 
-</textarea><script type="text/javascript" src="http://lbesson.bitbucket.org/md/strapdown.min.js"></script></body></html>
+</textarea><script type="text/javascript" src="http://lbesson.bitbucket.org/md/strapdown.min.js?mathjax=y"></script></body></html>
