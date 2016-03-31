@@ -48,8 +48,8 @@ for i = 1:size(pheno,2)
     # perform rotation
     (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
                                 K[whichKeep,whichKeep])
-    out0 = lmm(yy,XX,lambda,false)
-    out1 = lmm(yy,XX,lambda,true)    
+    out0 = flmm(yy,XX,lambda,false)
+    out1 = flmm(yy,XX,lambda,true)    
     res[2*i-1,:] = [out0.b; out0.sigma2; out0.h2; out0.ell; 0]
     res[2*i,:]   = [out1.b; out1.sigma2; out1.h2; out1.ell; 1]    
 end
@@ -69,7 +69,7 @@ function microbenchmark(nrep::Int64,f::Function,x...)
         f(x...)
         res[i] = toq()
     end
-    return res
+    return quantile(res,[0.25 ; 0.5; 0.75])
 end
 
 
@@ -83,6 +83,6 @@ function analyzeAllPheno(pheno::DataArray{Real,2},X::Array{Float64,2},
         # perform rotation
         (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
                                     K[whichKeep,whichKeep])
-        out = lmm(yy,XX,lambda,true)
+        out = flmm(yy,XX,lambda,true)
     end
 end
