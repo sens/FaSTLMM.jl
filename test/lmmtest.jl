@@ -61,7 +61,7 @@ writetable("results.csv",resDF);
 
 ###################################################################
 
-function microbenchmark(nrep::Int64,f::Function,x...)
+function benchmark(nrep::Int64,f::Function,x...)
     res = Array{Float64}(nrep)
 
     for i=1:nrep
@@ -69,7 +69,7 @@ function microbenchmark(nrep::Int64,f::Function,x...)
         f(x...)
         res[i] = toq()
     end
-    return quantile(res,[0.25 ; 0.5; 0.75])
+    return  [minimum(res) quantile(res,[0.25  0.5 0.75]) maximum(res)]
 end
 
 
@@ -86,3 +86,7 @@ function analyzeAllPheno(pheno::DataArray{Real,2},X::Array{Float64,2},
         out = flmm(yy,XX,lambda,true)
     end
 end
+
+###################################################################
+
+benchmark(100,analyzeAllPheno,pheno,X,K)
