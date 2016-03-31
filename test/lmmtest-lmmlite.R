@@ -60,5 +60,5 @@ time_full2 <- microbenchmark(R={
                                        recla$covar[keep,], use_cpp=TRUE)
             res <- fitLMM(eigenrot$Kva, eigenrot$y, eigenrot$X, reml=TRUE,
                           use_cpp=TRUE)
-        }}, times=10)
+        }}, times=100)
 print(time_full2, digits=4)
