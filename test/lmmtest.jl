@@ -95,5 +95,5 @@ end
 
 ###################################################################
 
-res = benchmark(10,analyzeAllPheno,pheno,X,K,results=true)
+res = benchmark(100,analyzeAllPheno,pheno,X,K,results=true)
 writecsv("julia_time.csv",res)
