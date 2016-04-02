@@ -1,3 +1,10 @@
+##################################################################
+## R/lmmlite results and comparison with Julia/FaSTLMM and Pylmm
+##################################################################
+## Builds on code by Karl Broman
+##################################################################
+
+# load library and attach data
 library(lmmlite)
 data(recla)
 n_phe <- ncol(recla$pheno)
@@ -8,6 +15,8 @@ lmmlite <- data.frame(index=rep(NA,2*n_phe),
                       sex=rep(NA,2*n_phe),
                       sigmasq=rep(NA,2*n_phe),
                       loglik=rep(NA,2*n_phe), stringsAsFactors=FALSE)
+
+## go through all the phenotypes and get results
 
 all_e <- vector("list", n_phe)
 for(i in 1:n_phe) {
@@ -28,13 +37,8 @@ for(i in 1:n_phe) {
     lmmlite[i*2,-(1:2)] <- c(res$hsq, res$beta, res$sigmasq, res$loglik)
 }
 
-##################################################################
-## comparison of results
-##################################################################
-
-juliaRes <- read.csv("results.csv")
-lmmlite$hsq[lmmlite$method=="reml"] - juliaRes$h2   
-log(lmmlite$sigmasq[lmmlite$method=="reml"]/juliaRes$sigma2)
+## write results to file
+write.csv(lmmlite,"lmmlite_results.csv")
 
 #################################################################
 ## performance comparison
