@@ -3,9 +3,10 @@ using Distances
 using Optim
 using DataArrays
 using DataFrames
+using FaSTLMM
 
 # include the function
-include("../src/lmm.jl")
+# include("../src/lmm.jl")
 
 
 K = readtable("../data/kinship.csv");
@@ -57,11 +58,11 @@ end
 cnames =["b0";"b1";"sigma2";"h2";"loglik";"reml"];
 resDF = DataFrame(res);
 names!(resDF,convert(Array{Symbol},cnames));
-writetable("results.csv",resDF);
+writetable("julia_results.csv",resDF);
 
 ###################################################################
 
-function benchmark(nrep::Int64,f::Function,x...)
+function benchmark(nrep::Int64,f::Function,x...;results::Bool=false)
     res = Array{Float64}(nrep)
 
     for i=1:nrep
@@ -69,7 +70,12 @@ function benchmark(nrep::Int64,f::Function,x...)
         f(x...)
         res[i] = toq()
     end
-    return  [minimum(res) quantile(res,[0.25  0.5 0.75]) maximum(res)]
+
+    if(results)
+        return res
+    else
+        return  [minimum(res) quantile(res,[0.25  0.5 0.75]) maximum(res)]
+    end
 end
 
 
@@ -89,4 +95,5 @@ end
 
 ###################################################################
 
-benchmark(100,analyzeAllPheno,pheno,X,K)
+res = benchmark(10,analyzeAllPheno,pheno,X,K,results=true)
+writecsv("julia_time.csv",res)
