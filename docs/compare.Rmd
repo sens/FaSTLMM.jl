@@ -1,0 +1,33 @@
+% Comparison of FaST-LMM implementations in Python, R, and Julia
+
+This is an attempt to compare FaST-LMM implementations in Python, R,
+and Julia.
+
+```{r setup}
+library(knitr)
+```
+
+```{python time-py, results=TRUE, eval=TRUE}
+execfile('../test/lmmtest-pylmm.py')
+```
+
+```{sh time-jl, results=TRUE,eval=TRUE}
+julia ../test/lmmtest.jl
+```
+
+```{r time-lmmlite}
+source("../test/lmmtest-lmmlite.R")
+```
+
+```{r readResults}
+allTimes <- time_full2
+juliaTimes <- read.csv("julia_time.csv",head=F)
+pylmmTimes <- read.csv("pylmm_time.csv",head=F)
+allTimesExpr <- c(as.character(allTimes$expr),
+                  rep("jl",100),rep("py",100))
+allTimesTime <- c(as.numeric(as.character(allTimes$time)),
+                  juliaTimes[,1]*10^9,pylmmTimes[,1]*10^9)
+allTimes <- data.frame(expr=allTimesExpr,time=allTimesTime)
+class(allTimes) <- c("microbenchmark","data.frame")
+print(allTimes)
+```
