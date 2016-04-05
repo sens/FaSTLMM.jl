@@ -7,27 +7,39 @@ and Julia.
 library(knitr)
 ```
 
+Execute the Python (`pylmm`) code that saves results in files.
+
 ```{python time-py, results=TRUE, eval=TRUE}
 execfile('../test/lmmtest-pylmm.py')
 ```
+Execute the Julia (`FaSTLMM.jl`) code that saves results in files.
 
 ```{sh time-jl, results=TRUE,eval=TRUE}
 julia ../test/lmmtest.jl
 ```
+Execute R (`lmmlite`) code that saves results as R objects.
 
 ```{r time-lmmlite}
 source("../test/lmmtest-lmmlite.R")
 ```
 
+Read the results and coerce them into `microbenchmark` class.
+
 ```{r readResults}
+## lmmlite results
 allTimes <- time_full2
+## julia results
 juliaTimes <- read.csv("julia_time.csv",head=F)
+## pylmm results
 pylmmTimes <- read.csv("pylmm_time.csv",head=F)
+## expression and runtimes 
 allTimesExpr <- c(as.character(allTimes$expr),
                   rep("jl",100),rep("py",100))
 allTimesTime <- c(as.numeric(as.character(allTimes$time)),
                   juliaTimes[,1]*10^9,pylmmTimes[,1]*10^9)
+## add to data frame and add the microbenchmark class
 allTimes <- data.frame(expr=allTimesExpr,time=allTimesTime)
 class(allTimes) <- c("microbenchmark","data.frame")
-print(allTimes)
+## print results
+print(allTimes,digits=3,unit="s")
 ```
