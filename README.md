@@ -1,5 +1,7 @@
 # FaST-LMM: *Fa*ctored *S*pectrally *T*ransformed *L*inear *M*ixed *M*odels
 
+[![Build Status](https://travis-ci.org/sens/FaSTLMM.jl.svg?branch=master)](https://travis-ci.org/sens/FaSTLMM.jl)
+
 Genetic analysis in structured populations used mixed linear models
 where the variance matrix of the error term is a linear combination of
 an identity matrix and a positive definite matrix.
