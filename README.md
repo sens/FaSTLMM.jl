@@ -20,4 +20,11 @@ phenotypes by the eigenvectors of $K$ we can transform estimation to a
 weighted least squares problem.
 
 This implementation is my attempt to learn Julia and numerical linear
-algebra.
+algebra.  The code is being tested.
+
+Guide to the directories:
+
+- `src`: Julia source code
+- `data`: Example data for development and testing
+- `test`: Code for testing
+- `docs`: Notes on comparisons with other implementations
