@@ -7,7 +7,7 @@ using FaSTLMM
 
 # include the function
 # include("../src/lmm.jl")
-
+# include("../src/wls.jl")
 
 K = readtable("../data/kinship.csv");
 K = K[2:size(K,2)];
@@ -38,7 +38,7 @@ K = convert(Array{Float64,2},K);
 # plot(x=p,y=loglik,Geom.line)
 
 # initialize matrix to store results
-res = Array{Float64}(size(pheno,2)*2,size(covar,2)+4)
+res = Array{Float64}(size(pheno,2)*2,size(covar,2)+4);
 
 # loop through the phenotypes
 for i = 1:size(pheno,2)
