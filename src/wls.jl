@@ -36,9 +36,9 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     sqrtw = sqrt(w)
     # scale by weights
     # yy = y.*sqrtw
-    yy = scale(sqrtw,y)
+    yy = Diagonal(sqrtw)*y
     # XX = diagm(sqrtw)*X
-    XX = scale(sqrtw,X)
+    XX = Diagonal(sqrtw)*X
         
     # QR decomposition of the transformed data
     (q,r) = qr(XX)
