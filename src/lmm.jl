@@ -76,7 +76,7 @@ function flmm(y::Array{Float64,2},
     end
 
     opt = optimize(logLik0,0.0,1.0,Brent())
-    h2 = opt.minimizer
+    h2 = Optim.minimizer(opt)
     est = wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
