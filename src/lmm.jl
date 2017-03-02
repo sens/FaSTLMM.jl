@@ -24,7 +24,7 @@ X = predictor matrix
 K = kinship matrix, expected to be symmetric and positive definite
 """
 
-function rotateData(y::Array{Float64,2},X::Array{Float64,2},
+function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
                     K::Array{Float64,2})
 
     # check dimensions
@@ -72,12 +72,11 @@ function flmm(y::Array{Float64,2},
              reml::Bool=false)
     
     function logLik0(h2::Float64)
-        - wls(y,X,1./(h2*lambda+(1-h2)),reml,true).ell
+        - wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true).ell
     end
 
-    opt = optimize(logLik0,0,1)
-    h2 = opt.minimum
-    est = wls(y,X,1./(h2*lambda+(1-h2)),reml,true)
+    opt = optimize(logLik0,0.0,1.0,Brent())
+    h2 = opt.minimizer
+    est = wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
-
