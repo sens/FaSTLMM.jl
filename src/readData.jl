@@ -40,7 +40,7 @@ function readGeno(file::AbstractString,nSkip::Int64,
 
     # allocate space for marker names and genotypes
     mNames = Array(ASCIIString,nMarkers)
-    geno = DataArray(Int64,nInd,nMarkers)
+    geno = DataArray(Float64,nInd,nMarkers)
     
     if(format!="HAB")
         error("Cannot read this type of format.")

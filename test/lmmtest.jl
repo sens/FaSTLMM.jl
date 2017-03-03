@@ -6,8 +6,8 @@ using DataFrames
 using FaSTLMM
 
 # include the function
-# include("../src/lmm.jl")
-# include("../src/wls.jl")
+include("../src/lmm.jl")
+include("../src/wls.jl")
 
 K = readtable("../data/kinship.csv");
 K = K[2:size(K,2)];

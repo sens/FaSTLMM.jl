@@ -63,7 +63,13 @@ type Flmm
 end            
         
 """
-lmm: fit linear mixed model 
+flmm: fit linear mixed model 
+
+y: 2-d array of (rotated) phenotypes
+X: 2-d array of (rotated) covariates
+lambda: 1-d array of eigenvalues
+reml: boolean indicating ML or REML estimation
+
 """
         
 function flmm(y::Array{Float64,2},
