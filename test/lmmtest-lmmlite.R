@@ -66,3 +66,4 @@ time_full2 <- microbenchmark(R={
                           use_cpp=TRUE)
         }}, times=100)
 print(time_full2, digits=4)
+
