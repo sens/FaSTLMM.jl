@@ -33,7 +33,7 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
          
     # square root of the weights
-    sqrtw = sqrt(w)
+    sqrtw = sqrt.(w)
     # scale by weights
     # yy = y.*sqrtw
     yy = Diagonal(sqrtw)*y
@@ -55,7 +55,7 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
     end
 
     # return coefficient and variance estimate
-    logdetSigma = n*log(sigma2) - sum(log(w)) 
+    logdetSigma = n*log(sigma2) - sum(log.(w)) 
     ell = -0.5 * ( logdetSigma + rss/sigma2 ) 
     if ( reml )
         ell -=  log(abs(det(r))) - (p/2)*(log(sigma2))
