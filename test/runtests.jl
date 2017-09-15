@@ -2,7 +2,7 @@ using Base.Test
 using Optim
 using DataArrays
 using DataFrames
-using FaSTLMM
+# using FaSTLMM
 
 # include the function
 # include("../src/lmm.jl")
@@ -29,7 +29,7 @@ res = Array{Float64}(size(pheno,2)*2,size(covar,2)+4)
 # loop through the phenotypes
 for i = 1:size(pheno,2)
     # keep only those individuals without missing phenotypes
-    whichKeep = !isna(pheno[:,i])
+    whichKeep = !isna.(pheno[:,i])
     y = Array{Float64}(sum(whichKeep),1)
     y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
     # perform rotation
@@ -49,11 +49,11 @@ writetable("julia_results.csv",resDF);
 pylmm = readtable("../data/pylmm_results.csv");
 
 # test for ml
-@test_approx_eq_eps pylmm[:hsq][2*(1:26)]  resDF[:h2][2*(1:26)-1]  0.01
+@test (pylmm[:hsq])[2*(1:26)] ≈ (resDF[:h2])[2*(1:26)-1] atol=0.1
 @test maximum(abs(log(resDF[:sigma2][2*(1:26)-1] ./
                       pylmm[:sigmasq][2*(1:26)]))) <= 0.012
 
 # test for ml
-@test_approx_eq_eps pylmm[:hsq][2*(1:26)-1]  resDF[:h2][2*(1:26)]  0.01
+@test  pylmm[:hsq][2*(1:26)-1] ≈ resDF[:h2][2*(1:26)] atol=0.1
 @test maximum(abs(log(resDF[:sigma2][2*(1:26)] ./
                       pylmm[:sigmasq][2*(1:26)-1]))) <= 0.01
