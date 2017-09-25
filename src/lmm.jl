@@ -19,8 +19,8 @@
 """
 rotateData: Rotates data with respect to the kinship matrix
 
-y = phenotype matrix
-X = predictor matrix
+y = phenotype matrix  
+X = predictor matrix  
 K = kinship matrix, expected to be symmetric and positive definite
 """
 
@@ -65,9 +65,9 @@ end
 """
 flmm: fit linear mixed model 
 
-y: 2-d array of (rotated) phenotypes
-X: 2-d array of (rotated) covariates
-lambda: 1-d array of eigenvalues
+y: 2-d array of (rotated) phenotypes  
+X: 2-d array of (rotated) covariates  
+lambda: 1-d array of eigenvalues  
 reml: boolean indicating ML or REML estimation
 
 """
