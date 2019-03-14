@@ -15,7 +15,6 @@
 ##################################################################
 # rotateData: rotate by orthogonal transformation
 ##################################################################
-
 """
 rotateData: Rotates data with respect to the kinship matrix
 
@@ -23,7 +22,6 @@ y = phenotype matrix
 X = predictor matrix  
 K = kinship matrix, expected to be symmetric and positive definite
 """
-
 function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
                     K::Array{Float64,2})
 
@@ -54,14 +52,12 @@ end
 ##################################################################
 # function to fit linear mixed model by optimizing heritability 
 ##################################################################
-
-type Flmm
+mutable struct Flmm
     b::Array{Float64,2}
     sigma2::Float64
     h2::Float64
     ell::Float64
-end            
-        
+end
 """
 flmm: fit linear mixed model 
 
@@ -70,8 +66,7 @@ X: 2-d array of (rotated) covariates
 lambda: 1-d array of eigenvalues  
 reml: boolean indicating ML or REML estimation
 
-"""
-        
+"""  
 function flmm(y::Array{Float64,2},
              X::Array{Float64,2},
              lambda::Array{Float64,1},

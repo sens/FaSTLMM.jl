@@ -2,7 +2,7 @@ module FaSTLMM
 
 # packages we need to work
 using Optim
-using DataArrays
+# using DataArrays
 using DataFrames
 
 # sata type we are exporting

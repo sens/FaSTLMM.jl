@@ -43,7 +43,7 @@ res = Array{Float64}(size(pheno,2)*2,size(covar,2)+4);
 # loop through the phenotypes
 for i = 1:size(pheno,2)
     # keep only those individuals without missing phenotypes
-    whichKeep = !isna(pheno[:,i])
+    whichKeep = !isna.(pheno[:,i])
     y = Array{Float64}(sum(whichKeep),1)
     y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
     # perform rotation
@@ -83,7 +83,7 @@ function analyzeAllPheno(pheno::DataArray{Real,2},X::Array{Float64,2},
                          K::Array{Float64,2})
     for i = 1:size(pheno,2)
         # keep only those individuals without missing phenotypes
-        whichKeep = !isna(pheno[:,i])
+        whichKeep = !isna.(pheno[:,i])
         y = Array{Float64}(sum(whichKeep),1)
         y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
         # perform rotation

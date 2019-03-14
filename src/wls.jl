@@ -2,7 +2,7 @@
 # wls: weighted least squares        
 ##################################################################        
 
-type Wls
+mutable struct Wls
     b::Array{Float64,2}
     sigma2::Float64
     ell::Float64
@@ -18,9 +18,7 @@ w = weights (positive, inversely proportional to variance), one-dim vector
 
 The variance estimate is maximum likelihood
 """
-
-function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
-             reml::Bool=false,loglik=false)
+function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::Bool=false,loglik=false)
 
     # number of individuals
     n = size(y,1)
