@@ -38,9 +38,11 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::B
     # XX = diagm(sqrtw)*X
     XX = Diagonal(sqrtw)*X
         
-    # QR decomposition of the transformed data
+    # QR decomposition of the transformed data    
     (q,r) = qr(XX)
-    b = r\At_mul_B(q,yy)
+    # MATH BUG? b = r\At_mul_B(q,yy)
+    b = (transpose(r)*r)\(transpose(XX)*yy)
+
     # estimate yy and calculate rss
     yyhat = XX*b
     # yyhat = q*At_mul_B(q,yy)

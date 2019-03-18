@@ -41,10 +41,10 @@ function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
 #    end
 
     # spectral decomposition of a symmetric matrix
-    EF = eigfact(K)
+    EF = eigen(K)
 
     # return rotated phenotype, covariates, and eigenvalues
-    return EF[:vectors]'y, EF[:vectors]'X, EF[:values]
+    return EF.vectors'y, EF.vectors'X, EF.values
 
 end
 
@@ -73,11 +73,11 @@ function flmm(y::Array{Float64,2},
              reml::Bool=false)
     
     function logLik0(h2::Float64)
-        - wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true).ell
+        - wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true).ell
     end
 
     opt = optimize(logLik0,0.0,1.0,Brent())
     h2 = Optim.minimizer(opt)
-    est = wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true)
+    est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
