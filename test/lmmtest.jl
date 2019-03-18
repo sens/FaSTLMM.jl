@@ -49,7 +49,7 @@ res = Array{Float64}(undef,size(pheno,2)*2,size(covar,2)+4);
 
 # loop through the phenotypes
 for i = 1:size(pheno,2)
-    println("Column $i in $(size(pheno,2))")
+    # println("Column $i in $(size(pheno,2))")
     # replace all "NA" with missing type
     for j = 1:size(pheno,1)
         if pheno[j,i] == "NA" 
@@ -103,12 +103,12 @@ end
 function analyzeAllPheno(pheno::Array{Any,2},X::Array{Float64,2},
                          K::Array{Float64,2})
     for i = 1:size(pheno,2)
-        # replace all "NA" with missing type
-        for j = 1:size(pheno,1)
-            if pheno[j,i] == "NA" 
-                pheno[j,i] = missing
-            end
-        end
+    #     # replace all "NA" with missing typ. UPDATE: Does not require replacing anymore because it is done already. 
+        # for j = 1:size(pheno,1)
+        #     if pheno[j,i] == "NA" 
+        #         pheno[j,i] = missing
+        #     end
+        # end
 
         # keep only those individuals without missing phenotypes
         whichKeep = .!ismissing.(pheno[:,i])
@@ -124,4 +124,4 @@ end
 ###################################################################
 
 res = benchmark(100,analyzeAllPheno,pheno,X,K,results=true)
-writecsv("julia_time.csv",res)
+writedlm("julia_time.csv",res, ",")
