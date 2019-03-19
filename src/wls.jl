@@ -40,7 +40,7 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::B
         
     # QR decomposition of the transformed data    
     (q,r) = qr(XX)
-    # MATH BUG? b = r\At_mul_B(q,yy)
+    # = r\At_mul_B(q,yy)  MATH BUG? because r is not factored out. 
     b = (transpose(r)*r)\(transpose(XX)*yy)
 
     # estimate yy and calculate rss

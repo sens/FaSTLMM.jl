@@ -1,5 +1,5 @@
-using Distributions
-using Distances
+# using Distributions
+# using Distances
 using Optim
 # using DataArrays
 # using DataFrames

@@ -1,0 +1,7 @@
+name = "FaSTLMM"
+uuid = "f6929236-49c9-11e9-24fa-21fcfd0f436c"
+authors = ["Xiaoqi Hu <cuchxq@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
