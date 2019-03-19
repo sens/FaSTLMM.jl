@@ -2,7 +2,7 @@ using Test
 using Optim
 # using DataArrays
 # using DataFrames
-# using FaSTLMM
+using FaSTLMM
 
 using DelimitedFiles
 using Missings 

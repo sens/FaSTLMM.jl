@@ -2,8 +2,9 @@ module FaSTLMM
 
 # packages we need to work
 using Optim
-# using DataArrays
-using DataFrames
+using DelimitedFiles
+using Missings
+using LinearAlgebra
 
 # sata type we are exporting
 export Flmm
