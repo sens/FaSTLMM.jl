@@ -2,7 +2,7 @@
 # wls: weighted least squares        
 ##################################################################        
 
-type Wls
+mutable struct Wls
     b::Array{Float64,2}
     sigma2::Float64
     ell::Float64
@@ -18,9 +18,7 @@ w = weights (positive, inversely proportional to variance), one-dim vector
 
 The variance estimate is maximum likelihood
 """
-
-function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
-             reml::Bool=false,loglik=false)
+function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::Bool=false,loglik=false)
 
     # check if weights are positive
     if(any(w.<=.0))
@@ -53,9 +51,11 @@ function ls(y::Array{Float64,2},X::Array{Float64,2},
     # number of covariates
     p = size(X,2)
     
-    # QR decomposition of the transformed data
-    (q,r) = qr(X)
-    b = r\At_mul_B(q,y)
+    # QR decomposition of the transformed data    
+    (q,r) = qr(XX)
+    # = r\At_mul_B(q,yy)  MATH BUG? because r is not factored out. 
+    b = (transpose(r)*r)\(transpose(XX)*yy)
+
     # estimate yy and calculate rss
     yhat = X*b
     # yhat = q*At_mul_B(q,yy)

@@ -6,13 +6,13 @@
 # For now, we are reading in data from Pjotr Prin's format.  Other
 # formats will be included later, as needed.
 
-using DataArrays
+# using DataArrays
 
 function readPheno(file::AbstractString,nSkip::Int64,
                    nPheno::Int64,nInd::Int64)
 
     # allocate space for phenotypes
-    pheno = DataArray(Float64,nInd,nPheno)
+    pheno = Array{Union{T, Missing}}(Float64,nInd,nPheno)
     
     f = open(file,"r")
         
@@ -39,7 +39,7 @@ function readGeno(file::AbstractString,nSkip::Int64,
                   nMarkers::Int64,nInd::Int64,format::AbstractString="HAB")
 
     # allocate space for marker names and genotypes
-    mNames = Array(ASCIIString,nMarkers)
+    mNames = Array(String,nMarkers)
     geno = DataArray(Float64,nInd,nMarkers)
     
     if(format!="HAB")
@@ -64,7 +64,7 @@ function readGeno(file::AbstractString,nSkip::Int64,
 end
 
 #####################################################################    
-function word2array(word::SubString{ASCIIString},wordLen::Int64)
+function word2array(word::SubString{String},wordLen::Int64)
     g = DataArray(Int64,wordLen)
     for i=1:wordLen
         g[i] = f2code(word[i])
@@ -86,7 +86,7 @@ function f2code(x::Char)
 end        
 
 #####################################################################    
-function str2num(x::SubString{ASCIIString})
+function str2num(x::SubString{String})
     n = tryparse(Float64,x)
     return isnull(n) ? NA : get(n)
 end

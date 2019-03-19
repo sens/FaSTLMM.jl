@@ -15,7 +15,6 @@
 ##################################################################
 # rotateData: rotate by orthogonal transformation
 ##################################################################
-
 """
 rotateData: Rotates data with respect to the kinship matrix
 
@@ -23,7 +22,6 @@ y = phenotype matrix
 X = predictor matrix  
 K = kinship matrix, expected to be symmetric and positive definite
 """
-
 function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
                     K::Array{Float64,2})
 
@@ -43,10 +41,10 @@ function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
 #    end
 
     # spectral decomposition of a symmetric matrix
-    EF = eigfact(K)
+    EF = eigen(K)
 
     # return rotated phenotype, covariates, and eigenvalues
-    return EF[:vectors]'y, EF[:vectors]'X, EF[:values]
+    return EF.vectors'y, EF.vectors'X, EF.values
 
 end
 
@@ -90,14 +88,12 @@ end
 ##################################################################
 # function to fit linear mixed model by optimizing heritability 
 ##################################################################
-
-type Flmm
+mutable struct Flmm
     b::Array{Float64,2}
     sigma2::Float64
     h2::Float64
     ell::Float64
-end            
-        
+end
 """
 flmm: fit linear mixed model 
 
@@ -106,19 +102,18 @@ X: 2-d array of (rotated) covariates
 lambda: 1-d array of eigenvalues  
 reml: boolean indicating ML or REML estimation
 
-"""
-        
+"""  
 function flmm(y::Array{Float64,2},
              X::Array{Float64,2},
              lambda::Array{Float64,1},
              reml::Bool=false)
     
     function logLik0(h2::Float64)
-        - wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true).ell
+        - wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true).ell
     end
 
     opt = optimize(logLik0,0.0,1.0,Brent())
     h2 = Optim.minimizer(opt)
-    est = wls(y,X,1.0./(h2*lambda+(1.0-h2)),reml,true)
+    est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
