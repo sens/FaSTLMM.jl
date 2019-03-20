@@ -16,15 +16,15 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # weights proportional to the variances
     wts = makeweights( out0.sigma2,out0.h2,lambda0 )
     # rescale by weights
-    scale!(sqrt.(1./wts),y0)
-    scale!(sqrt.(1./wts),X0)
+    scale!(sqrt.(1 ./wts),y0)
+    scale!(sqrt.(1 ./wts),X0)
 
     # perform genome scan
     rss0 = sum(y0.^2)
     lod = zeros(m)
     X = zeros(n,2)
     X[:,1] = X0[:,1]
-    for( i = 1:m )
+    for i = 1:m 
         X[:,2] = X0[:,i+1]
         out = ls(y0,X,reml,true)
         lod[i] = out.ell
