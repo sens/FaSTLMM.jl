@@ -18,7 +18,8 @@ w = weights (positive, inversely proportional to variance), one-dim vector
 
 The variance estimate is maximum likelihood
 """
-function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::Bool=false,loglik=false)
+function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},
+             reml::Bool=false,loglik::Bool=false)
 
     # check if weights are positive
     if(any(w.<=.0))
@@ -34,9 +35,9 @@ function wls(y::Array{Float64,2},X::Array{Float64,2},w::Array{Float64,1},reml::B
     XX = Diagonal(sqrtw)*X
 
     out = ls(yy,XX,reml,loglik)
-        
+
     if(loglik)
-        out[:ell] = out[:ell] + sum(log.(w))/2 
+        out.ell = out.ell + sum(log.(w))/2 
     end
 
     return out
@@ -51,11 +52,10 @@ function ls(y::Array{Float64,2},X::Array{Float64,2},
     # number of covariates
     p = size(X,2)
     
-    # QR decomposition of the transformed data    
-    (q,r) = qr(XX)
-    # = r\At_mul_B(q,yy)  MATH BUG? because r is not factored out. 
-    b = (transpose(r)*r)\(transpose(XX)*yy)
-
+    # least squares solution
+    fct = qr(X)
+    b = fct\y
+    
     # estimate yy and calculate rss
     yhat = X*b
     # yhat = q*At_mul_B(q,yy)
@@ -72,7 +72,7 @@ function ls(y::Array{Float64,2},X::Array{Float64,2},
     logdetSigma = n*log(sigma2)
     ell = -0.5 * ( logdetSigma + rss/sigma2 ) 
     if ( reml )
-        ell -=  log(abs(det(r))) - (p/2)*(log(sigma2))
+        ell -=  log(abs(det(fct.R))) - (p/2)*(log(sigma2))
     end
         
     return Wls(b,sigma2,ell)

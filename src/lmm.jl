@@ -109,11 +109,12 @@ function flmm(y::Array{Float64,2},
              reml::Bool=false)
     
     function logLik0(h2::Float64)
-        - wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true).ell
+        out = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
+        return -out.ell
     end
 
     opt = optimize(logLik0,0.0,1.0,Brent())
-    h2 = Optim.minimizer(opt)
+    h2 = opt.minimizer
     est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
