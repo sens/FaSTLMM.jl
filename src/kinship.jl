@@ -14,7 +14,7 @@ function calcKinship(geno::Array{Float64,2})
     nc = sz[2]
 
     # make matrix to hold distances
-    d = Array(Float64,nr,nr)
+    d = Array{Float64,2}(undef,nr,nr)
 
     # if empty then there is nothing to do
     if(nr==0)
@@ -26,7 +26,7 @@ function calcKinship(geno::Array{Float64,2})
         d[i,i] = 1.0
     end
 
-    iscomplete = Array(Bool,nc)
+    iscomplete = Array{Bool,1}(undef,nc)
     ncomplete::Int64 = 0    
     # off-diagonal elements need to be calculated    
     if(nr>=2)
