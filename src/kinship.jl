@@ -1,10 +1,10 @@
-############################################
-# function to calculate kinship
-############################################
+###############################################################
+# function to calculate kinship from genotype probability array
+###############################################################
 
 using Distances
 
-function calcKinship(geno::DataArray{Float64,2})
+function calcKinship(geno::Array{Float64,2})
 
     # get dimensions
     sz = size(geno)
@@ -21,9 +21,9 @@ function calcKinship(geno::DataArray{Float64,2})
         error("Nothing to do here.")
     end
 
-    # assign diagonals to zero
+    # assign diagonals to ones
     for i=1:nr
-        d[i,i] = 0
+        d[i,i] = 1.0
     end
 
     iscomplete = Array(Bool,nc)
@@ -32,10 +32,10 @@ function calcKinship(geno::DataArray{Float64,2})
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
-                iscomplete = !(geno.na[i,:] | geno.na[j,:])
+                iscomplete = !. ( ismissing.(g[i,:]) &. ismissing.(g[j,:]) )
                 ncomplete = sum(iscomplete)
-                d[i,j] = d[j,i] = cityblock(geno.data[i,iscomplete],
-                                      geno.data[j,iscomplete]) / (2*ncomplete)
+                d[i,j] = d[j,i] = sum(g[i,iscomplete]*g[j,iscomplete] +
+                                      (1-g[i,iscomplete])*(1-g[j,iscomplete]))/(ncomplete)
                 
             end
         end
