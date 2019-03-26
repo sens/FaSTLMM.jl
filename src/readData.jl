@@ -8,6 +8,8 @@
 
 # using DataArrays
 
+using DelimitedFiles
+
 function readPheno(file::AbstractString,nSkip::Int64,
                    nPheno::Int64,nInd::Int64)
 
@@ -31,6 +33,47 @@ function readPheno(file::AbstractString,nSkip::Int64,
         
     return pheno
 end
+
+
+#####################################################################        
+
+# function assumes that the first line is marker names, and the first
+# column is ids; both are strings
+#
+# the rest of the file is assumed to be probablities, i.e. numeric
+
+function readGenoProb(file::AbstractString;
+                      dlm::AbstractChar=',',
+                      getmarkernames::Bool=true,
+                      getids::Bool=true)
+
+    if(getmarkernames)
+        # read file
+        d = readdlm(file,dlm,header=true)
+        # markernames
+        markernames = d[2][2:end]
+        # genotype probabilities
+        gd = d[1]
+    else
+        # read file
+        d = readdlm(file,dlm=dlm,header=true)
+        # genotype probabilities
+        gd = d
+    end
+
+    # get ids        
+    if(getids)
+        ids = convert(Vector{String},gd[:,1])
+        gp = convert(Matrix{Float64},gd[:,2:end])
+        markernames = markernames[1:end-1]
+    else
+        gp = convert(Matrix{Float64},gd)
+    end
+
+    # returns only genotype probabilities; others discarded for now    
+    return gp
+end
+
 
     
 #####################################################################        
