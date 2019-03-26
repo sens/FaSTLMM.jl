@@ -13,12 +13,12 @@ function calcKinship(geno::Array{Float64,2})
     nr = sz[1]
     nc = sz[2]
 
-    # make matrix to hold distances
-    d = Array(Float64,nr,nr)
-
     # if empty then there is nothing to do
     if(nr==0)
         error("Nothing to do here.")
+    else
+        # make matrix to hold distances
+        d = zeros(nr,nr)
     end
 
     # assign diagonals to ones
@@ -26,13 +26,13 @@ function calcKinship(geno::Array{Float64,2})
         d[i,i] = 1.0
     end
 
-    iscomplete = Array(Bool,nc)
+    iscomplete = Array{Bool,1}(undef,nc)
     ncomplete::Int64 = 0    
     # off-diagonal elements need to be calculated    
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
-                iscomplete = !. ( ismissing.(g[i,:]) &. ismissing.(g[j,:]) )
+                iscomplete = .!( ismissing.(g[i,:]) .& ismissing.(g[j,:]) )
                 ncomplete = sum(iscomplete)
                 d[i,j] = d[j,i] = sum(g[i,iscomplete]*g[j,iscomplete] +
                                       (1-g[i,iscomplete])*(1-g[j,iscomplete]))/(ncomplete)
