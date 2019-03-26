@@ -32,15 +32,14 @@ function readPheno(file::AbstractString,nSkip::Int64,
     return pheno
 end
 
-
     
 #####################################################################        
 function readGeno(file::AbstractString,nSkip::Int64,
                   nMarkers::Int64,nInd::Int64,format::AbstractString="HAB")
 
     # allocate space for marker names and genotypes
-    mNames = Array(String,nMarkers)
-    geno = DataArray(Float64,nInd,nMarkers)
+    mNames = Array{String,1}(undef, nMarkers)
+    geno = Array{Float64,2}(undef, nInd,nMarkers)
     
     if(format!="HAB")
         error("Cannot read this type of format.")
@@ -65,7 +64,7 @@ end
 
 #####################################################################    
 function word2array(word::SubString{String},wordLen::Int64)
-    g = DataArray(Int64,wordLen)
+    g = Array{Int64,1}(undef, wordLen)
     for i=1:wordLen
         g[i] = f2code(word[i])
     end
