@@ -26,16 +26,16 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     y0 = scale * y0
     X0 = scale * X0
 
-
     # perform genome scan
     rss0 = sum(y0.^2)
+    out1 = ls(y0,X0[:,1],reml,true)
     lod = zeros(m)
     X = zeros(n,2)
     X[:,1] = X0[:,1]
     for i = 1:m 
         X[:,2] = X0[:,i+1]
         out = ls(y0,X,reml,true)
-        lod[i] = out.ell
+        lod[i] = out.ell-out1.ell
     end
 
     return lod
