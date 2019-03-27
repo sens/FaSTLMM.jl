@@ -134,4 +134,30 @@ function str2num(x::SubString{String})
 end
 
 
+function readBXDpheno(file::AbstractString)
+    return convert(Array{Float64,2},readdlm(file, ','; skipstart=1)[:,2:end-1])
+end
+
+function readBXDgeno(file::AbstractString; skipstart=1)
+    return convert(Array{Float64,2},readdlm(file, ','; skipstart=skipstart)[:,2:2:end])
+end
+
+function generate_x(x)
+    # # Random create covariates for now. This for loop can be used for real data later. 
+    # for row in 1:size(x)[1] 
+    #     if x[row] == "f"
+    #         x[row] = 1.0
+    #     else
+    #         x[row] = -1.0
+    #     end
+    # end
+    # return convert(Array{Float64,1}, x)
+
+    return rand([-1.0,1.0], size(x)[1])
+end
+    
+function readBXDtraits(file::AbstractString)
+    x_temp = readdlm(file, ','; skipstart=1)[:,end]
+    return hcat(ones(size(X_temp)[1]),process_x(X_temp))
+end
     

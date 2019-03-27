@@ -29,8 +29,8 @@ function calcKinship(geno::Matrix{Float64})
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
-                p1 = g[i,:]
-                p2 = g[j,:]
+                p1 = geno[i,:]
+                p2 = geno[j,:]
                 d[i,j] = d[j,i] = sum( p1 .* p2
                                        + (1 .- p1) .* (1 .- p2) ) / ncomplete
                 
@@ -69,10 +69,10 @@ function calcKinship(geno::Matrix{Union{Missing,Float64}})
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
-                iscomplete = .!( ismissing.(g[i,:]) .& ismissing.(g[j,:]) )
+                iscomplete = .!( ismissing.(geno[i,:]) .& ismissing.(geno[j,:]) )
                 ncomplete = sum(iscomplete)
-                p1 = g[i,iscomplete]
-                p2 = g[j,iscomplete]
+                p1 = geno[i,iscomplete]
+                p2 = geno[j,iscomplete]
                 d[i,j] = d[j,i] = sum( p1 .* p2
                                        + (1-p1) .* (1-p2) ) / ncomplete
                 
