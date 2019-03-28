@@ -14,5 +14,7 @@ pheno = readBXDpheno("../data/bxdData/traits.csv")
 geno = readGenoProb("../data/bxdData/geno_prob.csv")
 k = calcKinship(geno)
 
+## genome scan
 @btime scan(reshape(pheno[:,1], :, 1), geno, k, true)
-
+## genome scan permutation
+@btime scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);

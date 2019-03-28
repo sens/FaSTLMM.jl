@@ -79,7 +79,19 @@ function ls(y::Array{Float64,2},X::Array{Float64,2},
         
 end
 
+    
+"""
+rss: residual sum of squares
 
+y = outcome, matrix  
+X = predictors, matrix  
+
+Calculates the residual sum of squares using a QR decomposition.  The
+outcome matrix can be multivariate in which case the function returns
+the residual sum of squares of each column. The return values is a
+vector of length equal to the number of columns of y.
+
+"""
 function rss(y::Array{Float64,2},X::Array{Float64,2})
 
     # number of individuals
@@ -93,7 +105,6 @@ function rss(y::Array{Float64,2},X::Array{Float64,2})
     
     # estimate yy and calculate rss
     yhat = X*b
-    # yhat = q*At_mul_B(q,yy)
     rss = reduce(+,(y-yhat).^2,dims=1)
 
     return rss
