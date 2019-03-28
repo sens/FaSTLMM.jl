@@ -79,3 +79,24 @@ function ls(y::Array{Float64,2},X::Array{Float64,2},
         
 end
 
+
+function rss(y::Array{Float64,2},X::Array{Float64,2})
+
+    # number of individuals
+    n = size(y,1)
+    # number of covariates
+    p = size(X,2)
+    
+    # least squares solution
+    fct = qr(X)
+    b = fct\y
+    
+    # estimate yy and calculate rss
+    yhat = X*b
+    # yhat = q*At_mul_B(q,yy)
+    rss = reduce(+,(y-yhat).^2,dims=1)
+
+    return rss
+        
+end
+
