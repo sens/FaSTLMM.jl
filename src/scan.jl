@@ -4,6 +4,8 @@
 
 using Distributed
 using Random
+using LinearAlgebra
+using SharedArrays
 
 include("lmm.jl")
 
@@ -79,11 +81,10 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     
     # perform genome scan
     out0 = rss(y0perm,reshape(X0[:,1],n,1))
-    rss1 = zeros(m)
-    lod = zeros(nperm+1,m)
+    lod = SharedArray(zeros(nperm+1,m))
     X = zeros(n,2)
     X[:,1] = X0[:,1]
-    @distributed for i = 1:m 
+    @sync @distributed for i = 1:m 
         X[:,2] = X0[:,i+1]
         out1 = rss(y0perm,X)
         lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
