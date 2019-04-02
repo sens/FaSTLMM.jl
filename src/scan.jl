@@ -8,7 +8,11 @@ using LinearAlgebra
 using SharedArrays
 
 include("lmm.jl")
+include("util.jl")
 
+###
+# this function may not be needed
+###
 
 function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},reml::Bool)
@@ -46,7 +50,8 @@ end
 ## genome scan with permutations
 
 function scan(y::Array{Float64,2},g::Array{Float64,2},
-              K::Array{Float64,2},nperm::Int64=1024,rndseed::Int64=0,reml::Bool=true)
+              K::Array{Float64,2},nperm::Int64=1024,
+              rndseed::Int64=0,reml::Bool=true)
 
     # number of markers
     (n,m) = size(g)
@@ -64,21 +69,23 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
 
     ## random permutations
     rng = MersenneTwister(rndseed);
-    y0perm = zeros(n,nperm+1)
-    y0perm[:,1] = y0
-    for i=1:nperm
-        y0perm[:,i+1] = shuffle(rng,y0)
-    end
+    y0perm = shuffleVector(rng,y0[:,1],nperm)
 
-    # perform genome scan
+    ## null rss
     out0 = rss(y0perm,reshape(X0[:,1],n,1))
+    ## make shared array to hold LOD scores
     lod = SharedArray(zeros(nperm+1,m))
+    ## initialize covariate matrix
     X = zeros(n,2)
     X[:,1] = X0[:,1]
+    ## loop over markers
     @sync @distributed for i = 1:m
+        ## change the second column of covariate matrix X
         X[:,2] = X0[:,i+1]
+        ## alternative rss
         out1 = rss(y0perm,X)
-        lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
+        ## calculate LOD score and assign
+        lod[:,i] = (n/2)*(log10.(out0) - log10.(out1))
     end
 
     return lod
@@ -89,3 +96,5 @@ function makeweights( sigma2::Float64, h2::Float64,
                       lambda::Array{Float64,1} )
     return h2*lambda .+ (1.0-h2)
 end
+
+

@@ -30,3 +30,17 @@ function rowScale!(A::Matrix{Float64},x::Vector{Float64})
     end
 end
 
+"""
+perform random shuffles of vector
+the first column is the original vector if original=true
+"""
+function shuffleVector(rng::AbstractRNG,x::Vector{Float64},
+                 nshuffle::Int64,original::Bool=true)
+    xx = zeros(length(x),nshuffle+1)
+    xx[:,1] = x
+    for i=1:nshuffle
+        xx[:,i+1] = shuffle(rng,x)
+    end
+
+    return xx
+end
