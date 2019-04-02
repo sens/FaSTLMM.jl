@@ -151,7 +151,7 @@ function generate_x(x)
     #         x[row] = -1.0
     #     end
     # end
-    # return convert(Array{Float64,1}, x)
+    # return convert(Array{Float64,1}, x) 
 
     return rand([-1.0,1.0], size(x)[1])
 end
@@ -160,4 +160,27 @@ function readBXDtraits(file::AbstractString)
     x_temp = readdlm(file, ','; skipstart=1)[:,end]
     return hcat(ones(size(X_temp)[1]),process_x(X_temp))
 end
-    
+
+function writeToFile(data, filename)
+    open(filename, "w") do io 
+        writedlm(io, data, ',')
+    end 
+end
+
+function transform_bxd_pheno_to_gemma(inputfile::AbstractString, outputfile::AbstractString)
+    pheno = readdlm(inputfile, ',', skipstart=1);
+    open(outputfile,"w") do io
+        writedlm(io, pheno[:,2] )       
+    end
+end
+
+function transform_bxd_geno_to_gemma(inputfile::AbstractString, outputfile::AbstractString)
+    data = readdlm(inputfile, ','; header=true)
+    marker_names = data[2][2:2:end]
+    data = data[1][:, 2:2:end]
+    ignore_columns = fill("X", size(data)[2], 2)
+    output = hcat(hcat(marker_names,ignore_columns), transpose(data))
+    writeToFile(output , outputfile)
+    return output
+end
+
