@@ -26,7 +26,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # fit null lmm
     out00 = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
     # weights proportional to the variances
-    wts = makeweights( out00.sigma2,out00.h2,lambda0 )
+    wts = makeweights( out00.h2,lambda0 )
     # rescale by weights
     rowScale!(y0,sqrt.(wts))
     rowScale!(X0,sqrt.(wts))
@@ -60,9 +60,9 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # rotate data
     (y0,X0,lambda0) = rotateData(y,[intcpt g],K)
     # fit null lmm
-    out00 = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
+    vc = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
     # weights proportional to the variances
-    wts = makeweights( out00.h2,lambda0 )
+    wts = makeweights( vc.h2,lambda0 )
     # rescale by weights
     rowScale!(y0,sqrt.(wts))
     rowScale!(X0,sqrt.(wts))
@@ -79,13 +79,13 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     X = zeros(n,2)
     X[:,1] = X0[:,1]
     ## loop over markers
-    @sync @distributed for i = 1:m
+    for i = 1:m
         ## change the second column of covariate matrix X
         X[:,2] = X0[:,i+1]
         ## alternative rss
         out1 = rss(y0perm,X)
         ## calculate LOD score and assign
-        lod[:,i] = (n/2)*(log10.(out0) - log10.(out1))
+        lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
     end
 
     return lod
