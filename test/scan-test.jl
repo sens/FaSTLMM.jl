@@ -7,6 +7,7 @@ using DelimitedFiles
 using LinearAlgebra
 using Optim
 using Distributions
+using Test
 # using FaSTLMM
 
 using BenchmarkTools
@@ -18,7 +19,7 @@ geno = readGenoProb(geno_file)
 k = calcKinship(geno)
 
 ## genome scan
-time = @btime lod = scan(reshape(pheno[:,1], :, 1), geno, k, true)
+lod = scan(reshape(pheno[:,1], :, 1), geno, k, true)
 ## genome scan permutation
 #@btime scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
 
@@ -60,5 +61,4 @@ gemma_result = -log.(10,lrtp)
 #                              compare                          #
 #################################################################
 
-@test julia_result ≈ gemma_result atol=1e-4
-println("Compare result: $(isapprox(julia_result, gemma_result, atol=1e-4)")
+@test julia_result ≈ gemma_result atol=1e-3
