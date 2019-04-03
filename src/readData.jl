@@ -142,24 +142,24 @@ function readBXDgeno(file::AbstractString; skipstart=1)
     return convert(Array{Float64,2},readdlm(file, ','; skipstart=skipstart)[:,2:2:end])
 end
 
-function generate_x(x)
-    # # Random create covariates for now. This for loop can be used for real data later. 
-    # for row in 1:size(x)[1] 
-    #     if x[row] == "f"
-    #         x[row] = 1.0
-    #     else
-    #         x[row] = -1.0
-    #     end
-    # end
-    # return convert(Array{Float64,1}, x) 
+# function generate_x(x)
+#     # # Random create covariates for now. This for loop can be used for real data later. 
+#     # for row in 1:size(x)[1] 
+#     #     if x[row] == "f"
+#     #         x[row] = 1.0
+#     #     else
+#     #         x[row] = -1.0
+#     #     end
+#     # end
+#     # return convert(Array{Float64,1}, x) 
 
-    return rand([-1.0,1.0], size(x)[1])
-end
+#     return rand([-1.0,1.0], size(x)[1])
+# end
     
-function readBXDtraits(file::AbstractString)
-    x_temp = readdlm(file, ','; skipstart=1)[:,end]
-    return hcat(ones(size(X_temp)[1]),process_x(X_temp))
-end
+# function readBXDtraits(file::AbstractString)
+#     x_temp = readdlm(file, ','; skipstart=1)[:,end]
+#     return hcat(ones(size(X_temp)[1]),process_x(X_temp))
+# end
 
 function writeToFile(data, filename)
     open(filename, "w") do io 
@@ -167,10 +167,10 @@ function writeToFile(data, filename)
     end 
 end
 
-function transform_bxd_pheno_to_gemma(inputfile::AbstractString, outputfile::AbstractString)
-    pheno = readdlm(inputfile, ',', skipstart=1);
+function transform_bxd_pheno_to_gemma(inputfile::AbstractString, outputfile::AbstractString, iter::Int64)
+    pheno = readdlm(inputfile, ',', skipstart=1)[:, 2:end-1];
     open(outputfile,"w") do io
-        writedlm(io, pheno[:,2] )       
+        writedlm(io, pheno[:,iter])       
     end
 end
 
