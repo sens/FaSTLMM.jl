@@ -51,13 +51,13 @@ function compareValues(x_true::Array{Float64,1}, x::Array{Float64,1}, tolerance:
         error("Dimention Mismatch! Must compare two arrays of same length!")
     end
 
-    # passes = falses(size(x_true))
+    passes = falses(size(x_true))
     t_passes = falses(0)
     for i in 1:size(x_true)[1]
         e = abs(x[i]-x_true[i])
-        # if e < tolerance
-        #     passes[i] = true
-        # end
+        if e < tolerance
+            passes[i] = true
+        end
         
         if x_true[i] >= threshold
             if e <= tolerance 
@@ -69,9 +69,9 @@ function compareValues(x_true::Array{Float64,1}, x::Array{Float64,1}, tolerance:
         
     end
     # pass_rate = sum(passes) / size(x_true)[1]
-    pass_rate = sum(t_passes) / size(t_passes)[1]
-
-    return (pass_rate, t_passes)
+    # pass_rate = sum(t_passes) / size(t_passes)[1]
+    
+    return (sum(passes), size(t_passes)[1], sum(t_passes))
 
 end
 

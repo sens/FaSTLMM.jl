@@ -16,7 +16,7 @@ pheno_file = "../data/bxdData/traits.csv"
 pheno = readBXDpheno(pheno_file)
 geno_file = "../data/bxdData/geno_prob.csv"
 geno = readGenoProb(geno_file)
-k = calcKinship(geno)
+# k = calcKinship(geno)
 
 geno_output_file = "../data/bxdData/bxd_geno_for_gemma.txt"
 transform_bxd_geno_to_gemma(geno_file, geno_output_file);
@@ -26,16 +26,24 @@ gemma_bin = "../software/gemma-0.98.1-linux-static"
 # Run this command in terminal to get kinship matrix from gemma. 
 run(`$gemma_bin -g $geno_output_file -p ../data/bxdData/pheno_for_gemma.txt -gk -no-check`)
 
-testing_result = falses(size(pheno)[2])
+# getting kinship matrix from gemma 
+k = convert(Array{Float64,2},readdlm("./output/result.cXX.txt", '\t'))
+
+# testing result captures the comparison result between lmm and gemma. 
+# One row is for one phenotype, it contains the # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
+testing_result = Array{Float64}(undef, 10,5)#size(pheno)[2], 5)
+
+julia_gemma = Array{Float64}(undef, Int64(size(geno)[2]/2), 2)
 
 #looping over all phenotype. 
-for i in 1:size(pheno)[2]
+for i in 8:8#size(pheno)[2]
     #################################################################
     #                              julia                            #
     #################################################################
     
     ## genome scan
-    lod = scan(reshape(pheno[:,i], :, 1), geno, k, true)[3]
+    lmm_scan = scan(reshape(pheno[:,i], :, 1), geno, k, true)
+    lod = lmm_scan[3]
     ## genome scan permutation
     #@btime scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
 
@@ -69,10 +77,15 @@ for i in 1:size(pheno)[2]
     #                              compare                          #
     #################################################################
 
-    if(compareValues(julia_result, gemma_result, 1e-2, 2.0)[1] == 1.0)
-        testing_result[i] = true
-    end
-    println("______Testing result: $(testing_result[i]) __________")
+    cv = compareValues(julia_result, gemma_result, 1e-2, 2.0)
+    #columb name of testingresult is: # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
+    # testing_result[i,:] = [cv[1], cv[2], cv[3], lmm_scan[1], lmm_scan[2]]
+    # display(testing_result[i,:])
+    # display(julia_result)
+    # display(gemma_result)
+    julia_gemma[:,1]=julia_result
+    julia_gemma[:,2]=gemma_result
 end
-display(testing_result)
-writeToFile(testing_result,"./result/testing_result.txt")
+
+# display(testing_result)
+# writeToFile(testing_result,"./result/testing_result.txt")
