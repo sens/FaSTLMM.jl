@@ -30,7 +30,7 @@ for i in 1:size(pheno)[2]
     #################################################################
     
     ## genome scan
-    lod = scan(reshape(pheno[:,i], :, 1), geno, k, true)
+    lod = scan(reshape(pheno[:,i], :, 1), geno, k, true)[3]
     ## genome scan permutation
     #@btime scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
 
@@ -67,11 +67,10 @@ for i in 1:size(pheno)[2]
     #                              compare                          #
     #################################################################
 
-    # @test julia_result ≈ gemma_result atol=1e-3
-    testing_result[i] = isapprox(julia_result, gemma_result, atol=1e-3)
-    
-    # display(julia_result[1:5])
-    # display(gemma_result[1:5])
+    if(compareValues(julia_result, gemma_result, 1e-2, 2.0)[1] == 1.0)
+        testing_result[i] = true
+    end
+    println("______Testing result: $(testing_result[i]) __________")
 end
-
 display(testing_result)
+writeToFile(testing_result,"./result/testing_result.txt")

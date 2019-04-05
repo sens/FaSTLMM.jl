@@ -142,6 +142,10 @@ function readBXDgeno(file::AbstractString; skipstart=1)
     return convert(Array{Float64,2},readdlm(file, ','; skipstart=skipstart)[:,2:2:end])
 end
 
+# function readMarkerNames(file::AbstractString; skipstart=0)
+#     return convert(Array{String,1},readdlm(file, ','; skipstart=skipstart)[1,2:2:end] )
+# end
+
 # function generate_x(x)
 #     # # Random create covariates for now. This for loop can be used for real data later. 
 #     # for row in 1:size(x)[1] 
@@ -183,4 +187,3 @@ function transform_bxd_geno_to_gemma(inputfile::AbstractString, outputfile::Abst
     writeToFile(output , outputfile)
     return output
 end
-
