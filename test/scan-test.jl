@@ -21,6 +21,11 @@ k = calcKinship(geno)
 geno_output_file = "../data/bxdData/bxd_geno_for_gemma.txt"
 transform_bxd_geno_to_gemma(geno_file, geno_output_file);
 
+## run gemma:
+gemma_bin = "../software/gemma-0.98.1-linux-static"
+# Run this command in terminal to get kinship matrix from gemma. 
+run(`$gemma_bin -g $geno_output_file -p ../data/bxdData/pheno_for_gemma.txt -gk -no-check`)
+
 testing_result = falses(size(pheno)[2])
 
 #looping over all phenotype. 
@@ -48,10 +53,7 @@ for i in 1:size(pheno)[2]
     pheno_output_file = "../data/bxdData/pheno_for_gemma_$i.txt"
     transform_bxd_pheno_to_gemma(pheno_file,pheno_output_file, i);
 
-    ## run gemma:
-    gemma_bin = "../software/gemma-0.98.1-linux-static"
-    # Run this command in terminal to get kinship matrix from gemma. 
-    run(`$gemma_bin -g $geno_output_file -p $pheno_output_file -gk -no-check`)
+
     # Run this command in terminal to get gemma result, scan_result is the output file.  
     run(`$gemma_bin -g $geno_output_file -p $pheno_output_file -k ./output/result.cXX.txt -lmm 2 -o scan_result_$i -no-check`)
 
