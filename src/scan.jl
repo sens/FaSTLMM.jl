@@ -10,12 +10,22 @@ using SharedArrays
 include("lmm.jl")
 include("util.jl")
 
-###
-# this function may not be needed
-###
 
 function scan(y::Array{Float64,2},g::Array{Float64,2},
-              K::Array{Float64,2},reml::Bool)
+                   K::Array{Float64,2},reml::Bool,method::String="null")
+    if(method=="null")
+        return scan_null(y,g,K,reml)
+    elseif(method=="alt")
+        return scan_alt(y,g,K,reml)
+    end
+end
+
+###
+# scan markers under the null
+###
+
+function scan_null(y::Array{Float64,2},g::Array{Float64,2},
+                   K::Array{Float64,2},reml::Bool)
 
     # number of markers
     (n,m) = size(g)
@@ -46,6 +56,34 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
 
 end
 
+## re-estimate variance components under alternative
+
+function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
+                   K::Array{Float64,2},reml::Bool)
+
+    # number of markers
+    (n,m) = size(g)
+    # make intercept
+    intcpt = ones(n,1)
+    # rotate data
+    (y0,X0,lambda0) = rotateData(y,[intcpt g],K)
+
+    X00 = reshape(X0[:,1], :, 1)
+    # fit null lmm
+    out00 = flmm(y0,X00,lambda0,reml)
+
+    lod = zeros(m)
+    X = zeros(n,2)
+    X[:,1] = X0[:,1]
+    for i = 1:m
+        X[:,2] = X0[:,i+1]
+        out11 = flmm(y0,X,lambda0,reml)
+        lod[i] = (out11.ell-out00.ell)/log(10)
+    end
+
+    return ( out00.sigma2, out00.h2, lod )
+
+end
 
 ## genome scan with permutations
 
