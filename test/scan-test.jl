@@ -35,22 +35,25 @@ testing_result = Array{Float64}(undef, 100,5)#size(pheno)[2], 5)
 
 julia_gemma = Array{Float64}(undef, Int64(size(geno)[2]/2), 2)
 
+function run_julia(pheno::Array{Float64,1}, geno::Array{Float64,2}, k::Array{Float64,2}, reml::Bool, method::String )
+    ## genome scan
+    (sigma2, h2, lod) = scan(reshape(pheno, :, 1), geno, k, reml, method)
+    ## genome scan permutation
+    # scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
+
+    ## transform LOD to -log10(p) (univariate)
+    result = -log.(10,(ccdf.(Chisq(1),2*log(10)*lod)));
+    result = result[1:2:end]
+    return (result, sigma2, h2)
+end
+
 #looping over all phenotype. 
 for i in 1:8#size(pheno)[2]
     #################################################################
     #                              julia                            #
     #################################################################
-    
-    ## genome scan
-    lmm_scan = scan(reshape(pheno[:,i], :, 1), geno, k, true, "null")
-    lod = lmm_scan[3]
-    ## genome scan permutation
-    #@btime scan(reshape(pheno[:,1], :, 1), geno, k, 1024,1,true);
-
-    ## transform LOD to -log10(p) (univariate)
-    julia_result = -log.(10,(ccdf.(Chisq(1),2*log(10)*lod)));
-    julia_result = julia_result[1:2:end]
-
+    julia_time = @elapsed (julia_result, sigma2, h2) = run_julia(pheno[:,i], geno, k, true, "null")
+    println("Julia scan ran $julia_time seconds. ")
 
     #################################################################
     #                              gemma                            #
@@ -79,7 +82,7 @@ for i in 1:8#size(pheno)[2]
 
     cv = compareValues(julia_result, gemma_result, 1e-2, 2.0)
     #columb name of testingresult is: # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
-    testing_result[i,:] = [cv[1], cv[2], cv[3], lmm_scan[1], lmm_scan[2]]
+    testing_result[i,:] = [cv[1], cv[2], cv[3], sigma2, h2]
     # display(testing_result[i,:])
     # println("passrate is $(cv[1]/size(julia_gemma)[1])")
     # display(lod)
