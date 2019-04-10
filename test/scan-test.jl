@@ -2,6 +2,7 @@ include("../src/scan.jl")
 include("../src/kinship.jl")
 include("../src/readData.jl")
 include("../src/wls.jl")
+include("../src/lmm.jl")
 
 using DelimitedFiles
 using LinearAlgebra
@@ -12,28 +13,6 @@ using Test
 
 using BenchmarkTools
 
-pheno_file = "../data/bxdData/traits.csv"
-pheno = readBXDpheno(pheno_file)
-geno_file = "../data/bxdData/geno_prob.csv"
-geno = readGenoProb(geno_file)
-# k = calcKinship(geno)
-
-geno_output_file = "../data/bxdData/bxd_geno_for_gemma.txt"
-transform_bxd_geno_to_gemma(geno_file, geno_output_file);
-
-## run gemma:
-gemma_bin = "../software/gemma-0.98.1-linux-static"
-# Run this command in terminal to get kinship matrix from gemma. 
-run(`$gemma_bin -g $geno_output_file -p ../data/bxdData/pheno_for_gemma.txt -gk -no-check`)
-
-# getting kinship matrix from gemma 
-k = convert(Array{Float64,2},readdlm("./output/result.cXX.txt", '\t'))
-
-# testing result captures the comparison result between lmm and gemma. 
-# One row is for one phenotype, it contains the # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
-testing_result = Array{Float64}(undef, 100,5)#size(pheno)[2], 5)
-
-julia_gemma = Array{Float64}(undef, Int64(size(geno)[2]/2), 2)
 
 function run_julia(pheno::Array{Float64,1}, geno::Array{Float64,2}, k::Array{Float64,2}, reml::Bool, method::String )
     ## genome scan
@@ -61,35 +40,79 @@ function run_gemma(pheno_output_file::AbstractString, geno_output_file::Abstract
     return -log.(10,lrtp)
 end
 
+pheno_file = "../data/bxdData/traits.csv"
+pheno = readBXDpheno(pheno_file)
+geno_file = "../data/bxdData/geno_prob.csv"
+geno = readGenoProb(geno_file)
+# k = calcKinship(geno)
+
+geno_output_file = "../data/bxdData/bxd_geno_for_gemma.txt"
+transform_bxd_geno_to_gemma(geno_file, geno_output_file);
+
+## run gemma:
+gemma_bin = "../software/gemma-0.98.1-linux-static"
+# Run this command in terminal to get kinship matrix from gemma. 
+run(`$gemma_bin -g $geno_output_file -p ../data/bxdData/pheno_for_gemma.txt -gk -no-check`)
+
+# getting kinship matrix from gemma 
+k = convert(Array{Float64,2},readdlm("./output/result.cXX.txt", '\t'))
+
+# testing result captures the comparison result between lmm and gemma. 
+# One row is for one phenotype, it contains the # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
+num_run = 100
+run_count = 0
+testing_result = Array{Float64}(undef, num_run,5)#size(pheno)[2], 5)
+
+julia_gemma = Array{Float64}(undef, Int64(size(geno)[2]/2), 2)
+
+rescan_pass_rate = Array{Float64}(undef, num_run,2)
+
 #looping over all phenotype. 
-for i in 1:8#size(pheno)[2]
-    #################################################################
-    #                              julia                            #
-    #################################################################
-    julia_time = @elapsed (julia_result, sigma2, h2) = run_julia(pheno[:,i], geno, k, true, "null")
-    println("Julia scan ran $julia_time seconds. ")
+for i in 83:83#1:num_run
+    global run_count ## added this line because of the stupidity of julia scope 
 
     #################################################################
     #                              gemma                            #
     #################################################################
     pheno_output_file = "../data/bxdData/pheno_for_gemma_$i.txt"
     gemma_result = run_gemma(pheno_output_file, geno_output_file, i)
+
+    #################################################################
+    #                              julia                            #
+    #################################################################
+    julia_time = @elapsed (julia_result, sigma2, h2) = run_julia(pheno[:,i], geno, k, false, "null")
+    println("Julia scan ran $julia_time seconds. ")
+
     
     #################################################################
     #                              compare                          #
     #################################################################
 
-    cv = compareValues(julia_result, gemma_result, 1e-2, 2.0)
+    (total_pass, total_th, total_pass_th) = compareValues(julia_result, gemma_result, 1e-2, 2.0)
     #columb name of testingresult is: # of agreement, # of exeed threshold, # agreed and exeed threshold, sigma2, h2
-    testing_result[i,:] = [cv[1], cv[2], cv[3], sigma2, h2]
+    testing_result[i,:] = [total_pass, total_th, total_pass_th, sigma2, h2]
+
+    if (total_pass_th/total_th < 1.0)
+        #do rescan 
+        run_count += 1
+        rescan_time = @elapsed (rescan_result, sigma2, h2) = run_julia(pheno[:,i], geno, k, false, "alt")
+        (total_pass, total_th, total_pass_th) = compareValues(rescan_result, gemma_result, 1e-2, 2.0)
+        rescan_pass_rate[run_count, :] = [i, (total_pass_th/total_th)] 
+        testing_result[i,:] = [total_pass, total_th, total_pass_th, sigma2, h2]
+        println("total_th: $total_th")
+        println("rescan time: $rescan_time")
+    end
+
     # display(testing_result[i,:])
     # println("passrate is $(cv[1]/size(julia_gemma)[1])")
     # display(lod)
     # display(julia_result)
     # display(gemma_result)
-    # julia_gemma[:,1]=julia_result
-    # julia_gemma[:,2]=gemma_result
+    julia_gemma[:,1]=rescan_result
+    julia_gemma[:,2]=gemma_result
 end
 
-display(testing_result)
+# display(testing_result)
+# display(rescan_pass_rate[1:20,:])
+# display(julia_gemma)
 # writeToFile(testing_result,"./result/testing_result.txt")
