@@ -47,6 +47,20 @@ function run_julia(pheno::Array{Float64,1}, geno::Array{Float64,2}, k::Array{Flo
     return (result, sigma2, h2)
 end
 
+function run_gemma(pheno_output_file::AbstractString, geno_output_file::AbstractString, iter::Int64)
+    gemma_bin = "../software/gemma-0.98.1-linux-static"
+    ## Converting data sets to format usable by gemma: 
+    transform_bxd_pheno_to_gemma(pheno_file,pheno_output_file, iter);
+
+    # Run this command in terminal to get gemma result, scan_result is the output file.  
+    run(`time $gemma_bin -g $geno_output_file -p $pheno_output_file -k ./output/result.cXX.txt -lmm 2 -o scan_result_$iter -no-check`)
+
+    ##for gemma ouput (LRT) :-log10(p) transformation
+    gemma_scan = readdlm("./output/scan_result_$iter.assoc.txt";header=true)
+    lrtp=gemma_scan[1][:,end]
+    return -log.(10,lrtp)
+end
+
 #looping over all phenotype. 
 for i in 1:8#size(pheno)[2]
     #################################################################
@@ -58,24 +72,9 @@ for i in 1:8#size(pheno)[2]
     #################################################################
     #                              gemma                            #
     #################################################################
-
-    ## Converting data sets to format usable by gemma: 
-
     pheno_output_file = "../data/bxdData/pheno_for_gemma_$i.txt"
-    transform_bxd_pheno_to_gemma(pheno_file,pheno_output_file, i);
-
-
-    # Run this command in terminal to get gemma result, scan_result is the output file.  
-    run(`time $gemma_bin -g $geno_output_file -p $pheno_output_file -k ./output/result.cXX.txt -lmm 2 -o scan_result_$i -no-check`)
-
-    ##for gemma ouput (LRT) :-log10(p) transformation
-    #gemma=readdlm("lrt_chr1.assoc.txt";header=true)
-    #lrtp=gemma[1][:,end]
-    #-log.(10,lrtp)
-    gemma_scan = readdlm("./output/scan_result_$i.assoc.txt";header=true)
-    lrtp=gemma_scan[1][:,end]
-    gemma_result = -log.(10,lrtp)
-
+    gemma_result = run_gemma(pheno_output_file, geno_output_file, i)
+    
     #################################################################
     #                              compare                          #
     #################################################################
