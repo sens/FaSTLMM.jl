@@ -55,11 +55,11 @@ function compareValues(x_true::Array{Float64,1}, x::Array{Float64,1}, tolerance:
     t_passes = falses(0)
     for i in 1:size(x_true)[1]
         e = abs(x[i]-x_true[i])
-        if e < tolerance
+        if e <= tolerance
             passes[i] = true
         end
         
-        if x_true[i] >= threshold
+        if x[i] >= threshold
             if e <= tolerance 
                 push!(t_passes, true)
             else
