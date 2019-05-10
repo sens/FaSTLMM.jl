@@ -118,3 +118,33 @@ function flmm(y::Array{Float64,2},
     est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
+
+
+"""
+flmm: fit linear mixed model 
+
+y: 2-d array of (rotated) phenotypes  
+X: 2-d array of (rotated) covariates  
+lambda: 1-d array of eigenvalues
+h2: 1-d array of heritability values
+"""  
+function flmm(y::Array{Float64,2},
+             X::Array{Float64,2},
+             lambda::Array{Float64,1},
+             h2vec::Array{Float64,1}=convert(Vector,(0:100)/100.0))
+    
+    function logLik0(h2::Float64)
+        out = wls(y,X,1.0./makeweights(h2,lambda),false,true)
+        return -out.ell
+    end
+
+    ell = map(logLik0,h2vec)
+    return ell
+end
+    
+function makeweights( h2::Float64,
+                      lambda::Array{Float64,1} )
+    return h2*lambda .+ (1.0-h2)
+end
+
+
