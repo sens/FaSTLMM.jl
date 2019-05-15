@@ -77,7 +77,8 @@ function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
     X[:,1] = X0[:,1]
     for i = 1:m
         X[:,2] = X0[:,i+1]
-        out11 = flmm(y0,X,lambda0,reml, h20=out00.h2, d=1.0)
+        # out11 = flmm(y0,X,lambda0,reml, h20=out00.h2, d=1.0)
+        out11 = flmm(y0,X,lambda0,100)
         lod[i] = (out11.ell-out00.ell)/log(10)
     end
 

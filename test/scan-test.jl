@@ -27,7 +27,8 @@ function run_julia(pheno::Array{Float64,1}, geno::Array{Float64,2}, k::Array{Flo
 end
 
 function run_gemma(pheno_output_file::AbstractString, geno_output_file::AbstractString, iter::Int64)
-    gemma_bin = "../software/gemma-0.98.1-linux-static"
+    # gemma_bin = "../software/gemma-0.98.1-linux-static"
+    gemma_bin = "/home/sen/bin/gemma"
     ## Converting data sets to format usable by gemma: 
     transform_bxd_pheno_to_gemma(pheno_file,pheno_output_file, iter);
 
@@ -50,7 +51,9 @@ geno_output_file = "../data/bxdData/bxd_geno_for_gemma.txt"
 transform_bxd_geno_to_gemma(geno_file, geno_output_file);
 
 ## run gemma:
-gemma_bin = "../software/gemma-0.98.1-linux-static"
+# gemma_bin = "../software/gemma-0.98.1-linux-static"
+gemma_bin = "/home/sen/bin/gemma"
+
 # Run this command in terminal to get kinship matrix from gemma. 
 run(`$gemma_bin -g $geno_output_file -p ../data/bxdData/pheno_for_gemma.txt -gk -no-check`)
 
@@ -68,7 +71,7 @@ julia_gemma = Array{Float64}(undef, Int64(size(geno)[2]/2), 2)
 rescan_pass_rate = Array{Float64}(undef, num_run,2)
 
 #looping over all phenotype. 
-for i in 83:83#1:num_run
+for i in 81:81#1:num_run
     global run_count ## added this line because of the stupidity of julia scope 
 
     #################################################################

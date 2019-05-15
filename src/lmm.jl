@@ -94,6 +94,7 @@ mutable struct Flmm
     h2::Float64
     ell::Float64
 end
+    
 """
 flmm: fit linear mixed model 
 
@@ -121,17 +122,19 @@ end
 
 
 """
-flmm: fit linear mixed model 
+flmm: fit linear mixed model using grid of values
 
 y: 2-d array of (rotated) phenotypes  
 X: 2-d array of (rotated) covariates  
 lambda: 1-d array of eigenvalues
-h2: 1-d array of heritability values
+ngrid: number of grid values to consider
 """  
 function flmm(y::Array{Float64,2},
              X::Array{Float64,2},
              lambda::Array{Float64,1},
-             h2vec::Array{Float64,1}=convert(Vector,(0:100)/100.0))
+             ngrid::Int64=100)
+
+    h2vec = convert(Vector,(0:ngrid)/ngrid)
     
     function logLik0(h2::Float64)
         out = wls(y,X,1.0./makeweights(h2,lambda),false,true)
@@ -139,7 +142,10 @@ function flmm(y::Array{Float64,2},
     end
 
     ell = map(logLik0,h2vec)
-    return ell
+    h2 = h2vec[argmin(ell)]
+    est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),false,true)
+
+    return Flmm(est.b,est.sigma2,h2,est.ell)
 end
     
 function makeweights( h2::Float64,
