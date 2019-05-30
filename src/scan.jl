@@ -70,7 +70,9 @@ function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
 
     X00 = reshape(X0[:,1], :, 1)
     # fit null lmm
-    out00 = flmm(y0,X00,lambda0,reml)
+    # out00 = flmm(y0,X00,lambda0,reml)
+    out00 = flmm(y0,X00,lambda0,10)
+    
 
     lod = zeros(m)
     X = zeros(n,2)
@@ -78,7 +80,7 @@ function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
     for i = 1:m
         X[:,2] = X0[:,i+1]
         # out11 = flmm(y0,X,lambda0,reml, h20=out00.h2, d=1.0)
-        out11 = flmm(y0,X,lambda0,100)
+        out11 = flmm(y0,X,lambda0,10)
         lod[i] = (out11.ell-out00.ell)/log(10)
     end
 
@@ -130,4 +132,51 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     return lod
 
 end
+
+## genome scan with permutations
+
+function scan(y::Array{Float64,2},g::Array{Float64,2},
+              K::Array{Float64,2},nperm::Int64=1024,
+              rndseed::Int64=0,reml::Bool=true)
+
+    # number of markers
+    (n,m) = size(g)
+    # make intercept
+    intcpt = ones(n,1)
+    # rotate data
+    (y0,X0,lambda0) = rotateData(y,[intcpt g],K)
+    # fit null lmm
+    vc = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
+    # weights proportional to the variances
+    wts = makeweights( vc.h2,lambda0 )
+    # rescale by weights
+    rowScale!(y0,sqrt.(wts))
+    rowScale!(X0,sqrt.(wts))
+
+    ## random permutations
+    rng = MersenneTwister(rndseed);
+    y0perm = shuffleVector(rng,y0[:,1],nperm)
+
+    ## null rss
+    out0 = rss(y0perm,reshape(X0[:,1],n,1))
+    ## make shared array to hold LOD scores
+    lod = SharedArray(zeros(nperm+1,m))
+    ## initialize covariate matrix
+    X = zeros(n,2)
+    X[:,1] = X0[:,1]
+    ## loop over markers
+    for i = 1:m
+        ## change the second column of covariate matrix X
+        X[:,2] = X0[:,i+1]
+        ## alternative rss
+        out1 = rss(y0perm,X)
+        ## calculate LOD score and assign
+        lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
+    end
+
+    return lod
+
+end
+
+
 
