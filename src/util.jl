@@ -2,7 +2,39 @@
 # utility functions
 ###################################
 
+using Statistics
 using DataStructures
+
+# centers each column
+function colCenter!(A::Matrix{Float64})
+
+    (n,m) = size(A)
+
+    # get mean of each column; convert to vector    
+    colMeans = mean(A,dims=1) |> vec
+        
+    for i=1:n
+        for j=1:m
+            A[i,j] = A[i,j] - colMeans[j]
+        end
+    end
+end
+
+# centers each row
+function rowCenter!(A::Matrix{Float64})
+
+    (n,m) = size(A)
+
+    # get mean of each column; convert to vector    
+    rowMeans = mean(A,dims=2) |> vec
+        
+    for i=1:m
+        for j=1:n
+            A[j,i] = A[j,i] - rowMeans[j]
+        end
+    end
+end
+
 function colScale!(A::Matrix{Float64},x::Vector{Float64})
 
     (n,m) = size(A)
@@ -17,6 +49,14 @@ function colScale!(A::Matrix{Float64},x::Vector{Float64})
     end
 end
 
+function colStandardize!(A::Matrix{Float64})
+
+    colCenter!(A)
+    s = std(A,dims=1) |> vec
+    colScale!(A,s)
+    
+end
+    
 function rowScale!(A::Matrix{Float64},x::Vector{Float64})
 
     (n,m) = size(A)
