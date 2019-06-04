@@ -30,6 +30,43 @@ function bulkscan(y::Array{Float64,2},g::Array{Float64,2})
 end
 
 
+
+function bulkls(y::Matrix{Float64},X::Matrix{Float64},loglik::Bool=false)
+
+    n = size(y,1)
+    
+    fct = qr(X)
+    b = fct\y
+    yhat = X*b
+    resid = y-yhat
+    rss = sum(resid.^2,dims=1)
+
+    sigma2 = rss./n
+    logdetSigma = n*.log.(sigma2)
+    ell = -0.5 *. (logdetSigma +. rss./sigma2)
+
+    return b, sigma2, ell
+    
+end
+
+function bulkWls(y::Matrix{Float64},X::Matrix{Float64},
+    w::Vector{Float64},loglik::Bool=false)
+
+    # check if weights are positive
+    if(any(w.<=.0))
+        error("Some weights are not positive.")
+    end
+
+    sqrtw = sqrt.(w)
+    y0 = colScale!(copy(y),1.0/.sqrtw))
+    X0 = colScale!(copy(X),1.0/.sqrtw))
+
+    (b,sigma2,ell) = bulkls(y0,X0,loglik)
+     ell = ell + sum(log.(w))/2
+
+    return b,sigma2,ell    
+end
+
 # estimate heritability
 
 function esth2(y::Matrix{Float64},X::Matrix{Float64},
