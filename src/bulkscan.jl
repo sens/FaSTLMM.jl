@@ -29,6 +29,47 @@ function bulkscan(y::Array{Float64,2},g::Array{Float64,2})
     return lod
 end
 
+# bulk weighted linear regression
+# weights inversely proportional to variance
+
+function bulkscan(y::Array{Float64,2},g::Array{Float64,2},w::Vector{Float64})
+
+    n = size(y,1)
+    p = size(y,2)
+    m = size(g0,2)
+    
+    X0 = ones(n,1)
+    y0=deepcopy(y)
+    g0 = deepcopy(g)
+
+    # convert problem to least squares
+    sqrtw = sqrt.(w)
+    rowScale!(X0,1.0/.sqrtw)
+    rowScale!(y0,1.0/.sqrtw)
+    rowScale!(g0,1.0/.sqrtw)
+
+    y0 = bulkresid(y0,X0)
+    g0 = bulkresid(g0,X0)
+
+    # baseline sum of squares
+    rss0 = sum(y0^.2,dims=1)
+
+    # normalize genotypes
+    g0ss = sum(g0^.2,dims=1)
+    # rowScale!(g0,g0norm)
+
+    b = (y0'*g0)
+
+    lod = zeros(p,m)
+
+    for i=1:p
+        for j=1:m
+            lod[i,j] = (n/2)*log10(b[i,j]^2/(rss0[i]*g0ss[j]))
+        end
+    end
+    
+    return lod
+end
 
 
 function bulkls(y::Matrix{Float64},X::Matrix{Float64},loglik::Bool=false)
@@ -49,6 +90,21 @@ function bulkls(y::Matrix{Float64},X::Matrix{Float64},loglik::Bool=false)
     
 end
 
+# residual from least squares
+
+function bulkresid(y::Matrix{Float64},X::Matrix{Float64})
+
+    n = size(y,1)
+    
+    fct = qr(X)
+    b = fct\y
+    yhat = X*b
+    resid = y-yhat
+
+    return resid
+    
+end
+
 function bulkWls(y::Matrix{Float64},X::Matrix{Float64},
     w::Vector{Float64},loglik::Bool=false)
 
@@ -58,8 +114,8 @@ function bulkWls(y::Matrix{Float64},X::Matrix{Float64},
     end
 
     sqrtw = sqrt.(w)
-    y0 = colScale!(copy(y),1.0/.sqrtw))
-    X0 = colScale!(copy(X),1.0/.sqrtw))
+    y0 = rowScale!(deepcopy(y),1.0/.sqrtw))
+    X0 = rowScale!(deepcopy(X),1.0/.sqrtw))
 
     (b,sigma2,ell) = bulkls(y0,X0,loglik)
      ell = ell + sum(log.(w))/2
