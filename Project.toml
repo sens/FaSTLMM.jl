@@ -1,7 +1,7 @@
 name = "FaSTLMM"
-uuid = "f6929236-49c9-11e9-24fa-21fcfd0f436c"
+uuid = "25e8f979-b6c2-54e0-92af-a3e26911798a"
 authors = ["Xiaoqi Hu <cuchxq@gmail.com>","Saunak Sen <sen@uthsc.edu>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
