@@ -1,5 +1,5 @@
 name = "FaSTLMM"
-uuid = "25e8f979-b6c2-54e0-92af-a3e26911798a"
+uuid = "2d9a85ad-90ab-547e-b499-0a78e4b7c47b"
 authors = ["Xiaoqi Hu <cuchxq@gmail.com>","Saunak Sen <sen@uthsc.edu>"]
 version = "0.2.2"
 
