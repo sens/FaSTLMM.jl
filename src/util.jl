@@ -35,7 +35,7 @@ function rowCenter!(A::Matrix{Float64})
     end
 end
 
-function colScale!(A::Matrix{Float64},x::Vector{Float64})
+function colDivide!(A::Matrix{Float64},x::Vector{Float64})
 
     (n,m) = size(A)
     if(length(x)!=m)
@@ -53,11 +53,11 @@ function colStandardize!(A::Matrix{Float64})
 
     colCenter!(A)
     s = std(A,dims=1) |> vec
-    colScale!(A,s)
+    colDivide!(A,s)
     
 end
     
-function rowScale!(A::Matrix{Float64},x::Vector{Float64})
+function rowDivide!(A::Matrix{Float64},x::Vector{Float64})
 
     (n,m) = size(A)
     if(length(x)!=n)

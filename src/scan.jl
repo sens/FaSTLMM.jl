@@ -38,8 +38,8 @@ function scan_null(y::Array{Float64,2},g::Array{Float64,2},
     # weights proportional to the variances
     wts = makeweights( out00.h2,lambda0 )
     # rescale by weights
-    rowScale!(y0,sqrt.(wts))
-    rowScale!(X0,sqrt.(wts))
+    rowDivide!(y0,sqrt.(wts))
+    rowDivide!(X0,sqrt.(wts))
 
     # perform genome scan
     out0 = rss(y0,reshape(X0[:,1],n,1))
@@ -89,7 +89,8 @@ function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
 end
 
 ## genome scan with permutations
-
+## no covariates
+## one df test    
 function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},nperm::Int64=1024,
               rndseed::Int64=0,reml::Bool=true)
@@ -105,8 +106,8 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # weights proportional to the variances
     wts = makeweights( vc.h2,lambda0 )
     # rescale by weights
-    rowScale!(y0,sqrt.(wts))
-    rowScale!(X0,sqrt.(wts))
+    rowDivide!(y0,sqrt.(wts))
+    rowDivide!(X0,sqrt.(wts))
 
     ## random permutations
     rng = MersenneTwister(rndseed);
@@ -150,8 +151,8 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # weights proportional to the variances
     wts = makeweights( vc.h2,lambda0 )
     # rescale by weights
-    rowScale!(y0,sqrt.(wts))
-    rowScale!(X0,sqrt.(wts))
+    rowDivide!(y0,sqrt.(wts))
+    rowDivide!(X0,sqrt.(wts))
 
     ## random permutations
     rng = MersenneTwister(rndseed);
