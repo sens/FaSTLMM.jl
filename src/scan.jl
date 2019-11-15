@@ -90,7 +90,7 @@ end
 
 ## genome scan with permutations
 ## no covariates
-## one df test    
+## one-df tests    
 function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},nperm::Int64=1024,
               rndseed::Int64=0,reml::Bool=true)
@@ -105,18 +105,19 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     vc = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
     # weights proportional to the variances
     wts = makeweights( vc.h2,lambda0 )
-    # rescale by weights
+    # rescale by weights; now these have same mean/variance and are independent
     rowDivide!(y0,sqrt.(wts))
     rowDivide!(X0,sqrt.(wts))
 
-    ## random permutations
+    ## random permutations; the first column is the original data
     rng = MersenneTwister(rndseed);
-    y0perm = shuffleVector(rng,y0[:,1],nperm)
+    y0perm = shuffleVector(rng,y0[:,1],nperm,original=true)
 
-    ## null rss
-    out0 = rss(y0perm,reshape(X0[:,1],n,1))
-    ## make shared array to hold LOD scores
-    lod = SharedArray(zeros(nperm+1,m))
+    ## null rss vector
+    rss00 = rss(y0perm,reshape(X0[:,1],n,1))
+    rss1 = similar(out0)
+    ## make array to hold LOD scores
+    lod = zeros(nperm+1,m)
     ## initialize covariate matrix
     X = zeros(n,2)
     X[:,1] = X0[:,1]
@@ -125,9 +126,9 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         ## change the second column of covariate matrix X
         X[:,2] = X0[:,i+1]
         ## alternative rss
-        out1 = rss(y0perm,X)
+        rss1[:] = rss(y0perm,X)
         ## calculate LOD score and assign
-        lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
+        lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
     end
 
     return lod
@@ -135,44 +136,49 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
 end
 
 ## genome scan with permutations
-
-function scan(y::Array{Float64,2},g::Array{Float64,2},
+## more than 1df tests
+function scan(y::Array{Float64,2},g::Array{Float64,3},
               K::Array{Float64,2},nperm::Int64=1024,
               rndseed::Int64=0,reml::Bool=true)
 
     # number of markers
-    (n,m) = size(g)
+    (n,m,p) = size(g)
+    # flatted genotypes
+    g = permutedims(g,(1,3,2))
+    flatg = reshape(g,(n,p*m))
     # make intercept
     intcpt = ones(n,1)
     # rotate data
-    (y0,X0,lambda0) = rotateData(y,[intcpt g],K)
+    (y0,X0,lambda0) = rotateData(y,[intcpt flatg],K)
     # fit null lmm
     vc = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
     # weights proportional to the variances
     wts = makeweights( vc.h2,lambda0 )
-    # rescale by weights
+    # rescale by weights; now these have same mean/variance and are independent
     rowDivide!(y0,sqrt.(wts))
     rowDivide!(X0,sqrt.(wts))
 
-    ## random permutations
+    ## random permutations; the first column is the original data
     rng = MersenneTwister(rndseed);
-    y0perm = shuffleVector(rng,y0[:,1],nperm)
+    y0perm = shuffleVector(rng,y0[:,1],nperm,original=true)
 
-    ## null rss
-    out0 = rss(y0perm,reshape(X0[:,1],n,1))
-    ## make shared array to hold LOD scores
-    lod = SharedArray(zeros(nperm+1,m))
+    ## null rss vector
+    rss00 = rss(y0perm,reshape(X0[:,1],n,1))
+    rss1 = similar(out0)
+    ## make array to hold LOD scores
+    lod = zeros(nperm+1,m)
     ## initialize covariate matrix
-    X = zeros(n,2)
+    X = zeros(n,p)
     X[:,1] = X0[:,1]
     ## loop over markers
     for i = 1:m
-        ## change the second column of covariate matrix X
-        X[:,2] = X0[:,i+1]
+        ## change the rest of the elements of covariate matrix X
+        idx = 1+((i-1)*p):(i*p-1)
+        X[:,2:(p-1)] = X0[:,idx]
         ## alternative rss
-        out1 = rss(y0perm,X)
+        rss1[:] = rss(y0perm,X)
         ## calculate LOD score and assign
-        lod[:,i] = (n/2)*(log10.(out0) .- log10.(out1))
+        lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
     end
 
     return lod
