@@ -95,6 +95,10 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},nperm::Int64=1024,
               rndseed::Int64=0,reml::Bool=true)
 
+    # check number of traits
+    if(size(y,2)!=1)
+        error("Can only handle one trait.")
+    end
     # number of markers
     (n,m) = size(g)
     # make intercept
