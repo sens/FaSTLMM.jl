@@ -153,9 +153,12 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         end
         ## null rss vector
         rss0 = rss(r0perm,reshape(X0[:,1],n,1))
+        X = zeros(n,2)
+        X[:,1] = X0[:,1]
         @everywhere rss0 = $rss0
         @everywhere r0perm = $r0perm
         @everywhere X0 = $X0
+        @everywhere X = $X
         @everywhere include("../src/lmm.jl")
         @everywhere include("../src/util.jl")           
         @everywhere include("../src/wls.jl")                       
@@ -165,8 +168,9 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         ## loop over markers
         @sync @distributed for i = 1:m
             ## calculate LOD score and assign
+            X[:,2] = X0[:,i+1]
             lod[:,i] = (n/2)*(log10.(rss0) .-
-                              log10.(rss(r0perm,hcat(X0[:,1],X0[:,i+1]))))
+                              log10.(rss(r0perm,X)))
         end
             
     end

@@ -94,17 +94,25 @@ the residual sum of squares of each column. The return values is a
 vector of length equal to the number of columns of y.
 
 """
-function rss(y::Array{Float64,2},X::Array{Float64,2})
+function rss(y::Array{Float64,2},X::Array{Float64,2},method="cholesky")
 
     # number of individuals
     n = size(y,1)
     # number of covariates
     p = size(X,2)
-    
+
     # least squares solution
+    # faster but numerically less stable
+    if(method=="cholesky")
+        b = (X'X)\(X'y)
+    end
+
+    # slower but numerically more stable        
+    if(method=="qr")    
     fct = qr(X)
     b = fct\y
-    
+    end
+        
     # estimate yy and calculate rss
     yhat = X*b
     rss = reduce(+,(y-yhat).^2,dims=1)
