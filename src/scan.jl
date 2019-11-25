@@ -90,9 +90,11 @@ end
 
 ## genome scan with permutations
 ## no covariates
-## one-df tests    
+## one-df tests
+## with parallelization    
 function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},nperm::Int64=1024,
+              nprocs::Int64=1,
               rndseed::Int64=0,reml::Bool=true)
 
     # check number of traits
@@ -118,25 +120,57 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     ## random permutations; the first column is the original data
     rng = MersenneTwister(rndseed);
     r0perm = shuffleVector(rng,r0[:,1],nperm,true)
-        
-    ## null rss vector
-    rss0 = rss(r0perm,reshape(X0[:,1],n,1))
-    rss1 = similar(rss0)
-    ## make array to hold LOD scores
-    lod = zeros(nperm+1,m)
-    ## initialize covariate matrix
-    X = zeros(n,2)
-    X[:,1] = X0[:,1]
-    ## loop over markers
-    for i = 1:m
-        ## change the second column of covariate matrix X
-        X[:,2] = X0[:,i+1]
-        ## alternative rss
-        rss1[:] = rss(r0perm,X)
-        ## calculate LOD score and assign
-        lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
-    end
 
+    if(nprocs<=1)
+        nprocs = 1
+    end
+        
+    if(nprocs==1)        
+        ## null rss vector
+        rss0 = rss(r0perm,reshape(X0[:,1],n,1))
+        rss1 = similar(rss0)
+        ## make array to hold LOD scores
+        lod = zeros(nperm+1,m)
+        ## initialize covariate matrix
+        X = zeros(n,2)
+        X[:,1] = X0[:,1]
+        ## loop over markers
+        for i = 1:m
+            ## change the second column of covariate matrix X
+            X[:,2] = X0[:,i+1]
+            ## alternative rss
+            rss1[:] = rss(r0perm,X)
+            ## calculate LOD score and assign
+            lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
+        end
+    else
+        if(Distributed.nprocs()<nprocs)
+            addprocs(nprocs-Distributed.nprocs())
+        end
+        if(Distributed.nprocs()>nprocs)
+            wks = workers()
+            rmprocs(wks[(nprocs+1):end])
+        end
+        ## null rss vector
+        rss0 = rss(r0perm,reshape(X0[:,1],n,1))
+        @everywhere rss0 = $rss0
+        @everywhere r0perm = $r0perm
+        @everywhere X0 = $X0
+        @everywhere include("../src/lmm.jl")
+        @everywhere include("../src/util.jl")           
+        @everywhere include("../src/wls.jl")                       
+
+        ## make array to hold LOD scores
+        lod = SharedArray{Float64}((nperm+1,m))
+        ## loop over markers
+        @sync @distributed for i = 1:m
+            ## calculate LOD score and assign
+            lod[:,i] = (n/2)*(log10.(rss0) .-
+                              log10.(rss(r0perm,hcat(X0[:,1],X0[:,i+1]))))
+        end
+            
+    end
+        
     return lod
 
 end

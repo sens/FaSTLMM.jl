@@ -3,6 +3,7 @@
 ###################################
 
 using Statistics
+using Random
 # using DataStructures
 
 # centers each column
