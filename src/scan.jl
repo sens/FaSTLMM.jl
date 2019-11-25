@@ -99,6 +99,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     if(size(y,2)!=1)
         error("Can only handle one trait.")
     end
+        
     # number of markers
     (n,m) = size(g)
     # make intercept
@@ -107,19 +108,20 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     (y0,X0,lambda0) = rotateData(y,[intcpt g],K)
     # fit null lmm
     vc = flmm(y0,reshape(X0[:,1], :, 1),lambda0,reml)
+    r0 = y0 - X0[:,1]*vc.b
     # weights proportional to the variances
     wts = makeweights( vc.h2,lambda0 )
     # rescale by weights; now these have same mean/variance and are independent
-    rowDivide!(y0,sqrt.(wts))
+    rowDivide!(r0,sqrt.(wts))
     rowDivide!(X0,sqrt.(wts))
 
     ## random permutations; the first column is the original data
     rng = MersenneTwister(rndseed);
-    y0perm = shuffleVector(rng,y0[:,1],nperm,original=true)
-
+    r0perm = shuffleVector(rng,r0[:,1],nperm,true)
+        
     ## null rss vector
-    rss00 = rss(y0perm,reshape(X0[:,1],n,1))
-    rss1 = similar(out0)
+    rss0 = rss(r0perm,reshape(X0[:,1],n,1))
+    rss1 = similar(rss0)
     ## make array to hold LOD scores
     lod = zeros(nperm+1,m)
     ## initialize covariate matrix
@@ -130,7 +132,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         ## change the second column of covariate matrix X
         X[:,2] = X0[:,i+1]
         ## alternative rss
-        rss1[:] = rss(y0perm,X)
+        rss1[:] = rss(r0perm,X)
         ## calculate LOD score and assign
         lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
     end

@@ -3,7 +3,7 @@
 ###################################
 
 using Statistics
-using DataStructures
+# using DataStructures
 
 # centers each column
 function colCenter!(A::Matrix{Float64})
