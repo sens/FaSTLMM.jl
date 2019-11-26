@@ -116,6 +116,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     # rescale by weights; now these have same mean/variance and are independent
     rowDivide!(r0,sqrt.(wts))
     rowDivide!(X0,sqrt.(wts))
+    X00 = resid(X0[:,2:end],reshape(X0[:,1],:,1))
 
     ## random permutations; the first column is the original data
     rng = MersenneTwister(rndseed);
@@ -135,13 +136,13 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         lod = zeros(nperm+1,m)
         ## initialize covariate matrix
         X = zeros(n,2)
-        X[:,1] = X0[:,1]
+        # X[:,1] = X0[:,1]
         ## loop over markers
         for i = 1:m
             ## change the second column of covariate matrix X
-            X[:,2] = X0[:,i+1]
+            # X[:,2] = X0[:,i+1]
             ## alternative rss
-            rss1[:] = rss(r0perm,X)
+            rss1[:] = rss(r0perm,reshape(X00[:,i],:,1))
             ## calculate LOD score and assign
             lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
         end
