@@ -121,10 +121,12 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     rng = MersenneTwister(rndseed);
     r0perm = shuffleVector(rng,r0[:,1],nperm,true)
 
+    ## if the number of processes is negative or 0, set to 1    
     if(nprocs<=1)
         nprocs = 1
     end
-        
+
+    # serial processing        
     if(nprocs==1)        
         ## null rss vector
         rss0 = rss(r0perm,reshape(X0[:,1],n,1))
@@ -143,10 +145,12 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
             ## calculate LOD score and assign
             lod[:,i] = (n/2)*(log10.(rss0) .- log10.(rss1))
         end
-    else
+    else # distributed processing
+        # if number of processes desired is greater than current
         if(Distributed.nprocs()<nprocs)
             addprocs(nprocs-Distributed.nprocs())
         end
+        # if number of processes desired is less than current    
         if(Distributed.nprocs()>nprocs)
             wks = workers()
             rmprocs(wks[(nprocs+1):end])
@@ -155,6 +159,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         rss0 = rss(r0perm,reshape(X0[:,1],n,1))
         X = zeros(n,2)
         X[:,1] = X0[:,1]
+        # send data to all processes    
         @everywhere rss0 = $rss0
         @everywhere r0perm = $r0perm
         @everywhere X0 = $X0
