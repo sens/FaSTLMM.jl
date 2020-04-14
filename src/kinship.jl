@@ -24,16 +24,15 @@ function calcKinship(geno::Matrix{Float64})
         d[i,i] = 1.0
     end
 
-    ncomplete = nc        
-    # off-diagonal elements need to be calculated    
+    ncomplete = nc
+    # off-diagonal elements need to be calculated
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
                 p1 = geno[i,:]
                 p2 = geno[j,:]
-                d[i,j] = d[j,i] = sum( p1 .* p2
-                                       + (1 .- p1) .* (1 .- p2) ) / ncomplete
-                
+                d[i,j] = d[j,i] = sum( p1 .* p2 + (1 .- p1) .* (1 .- p2) ) / ncomplete
+
             end
         end
     end
@@ -64,8 +63,8 @@ function calcKinship(geno::Matrix{Union{Missing,Float64}})
     end
 
     iscomplete = Array{Bool,1}(undef,nc)
-    ncomplete::Int64 = 0    
-    # off-diagonal elements need to be calculated    
+    ncomplete::Int64 = 0
+    # off-diagonal elements need to be calculated
     if(nr>=2)
         for i=1:(nr-1)
             for j=(i+1):nr
@@ -75,10 +74,9 @@ function calcKinship(geno::Matrix{Union{Missing,Float64}})
                 p2 = geno[j,iscomplete]
                 d[i,j] = d[j,i] = sum( p1 .* p2
                                        + (1-p1) .* (1-p2) ) / ncomplete
-                
+
             end
         end
     end
     return d
 end
-
