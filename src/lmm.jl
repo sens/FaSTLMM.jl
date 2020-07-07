@@ -18,8 +18,8 @@
 """
 rotateData: Rotates data with respect to the kinship matrix
 
-y = phenotype matrix  
-X = predictor matrix  
+y = phenotype matrix
+X = predictor matrix
 K = kinship matrix, expected to be symmetric and positive definite
 """
 function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
@@ -47,8 +47,6 @@ function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
     return EF.vectors'y, EF.vectors'X, EF.values
 
 end
-
-
 
 """
 rotateData: Rotates data with respect to the kinship matrix
@@ -84,9 +82,13 @@ function rotateData(y::AbstractArray{Float64,2},X::AbstractArray{Float64,2},
 
 end
 
+function makeweights(h2::Float64,lambda::Array{Float64,1})
+    return h2*lambda .+ (1.0-h2)
+end
+
 
 ##################################################################
-# function to fit linear mixed model by optimizing heritability 
+# function to fit linear mixed model by optimizing heritability
 ##################################################################
 mutable struct Flmm
     b::Array{Float64,2}
@@ -94,48 +96,19 @@ mutable struct Flmm
     h2::Float64
     ell::Float64
 end
-    
-"""
-flmm: fit linear mixed model 
-
-y: 2-d array of (rotated) phenotypes  
-X: 2-d array of (rotated) covariates  
-lambda: 1-d array of eigenvalues  
-reml: boolean indicating ML or REML estimation
-
-"""  
-function flmm(y::Array{Float64,2},
-             X::Array{Float64,2},
-             lambda::Array{Float64,1},
-             reml::Bool=false;h20::Float64=0.5,d::Float64=1.0)
-    
-    function logLik0(h2::Float64)
-        out = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
-        return -out.ell
-    end
-
-    opt = optimize(logLik0,max(h20-d,0.0),min(h20+d,1.0))
-    h2 = opt.minimizer
-    est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
-    return Flmm(est.b,est.sigma2,h2,est.ell)
-end
 
 
 """
 flmm: fit linear mixed model using grid of values
 
-y: 2-d array of (rotated) phenotypes  
-X: 2-d array of (rotated) covariates  
+y: 2-d array of (rotated) phenotypes
+X: 2-d array of (rotated) covariates
 lambda: 1-d array of eigenvalues
 ngrid: number of grid values to consider
-"""  
-function flmm(y::Array{Float64,2},
-             X::Array{Float64,2},
-             lambda::Array{Float64,1},
-             ngrid::Int64=100)
-
+"""
+function flmm(y::Array{Float64,2}, X::Array{Float64,2}, lambda::Array{Float64,1}, ngrid::Int64)
     h2vec = convert(Vector,(0:ngrid)/ngrid)
-    
+
     function logLik0(h2::Float64)
         out = wls(y,X,1.0./makeweights(h2,lambda),false,true)
         return -out.ell
@@ -147,10 +120,26 @@ function flmm(y::Array{Float64,2},
 
     return Flmm(est.b,est.sigma2,h2,est.ell)
 end
-    
-function makeweights( h2::Float64,
-                      lambda::Array{Float64,1} )
-    return h2*lambda .+ (1.0-h2)
+
+
+
+"""
+flmm: fit linear mixed model
+
+y: 2-d array of (rotated) phenotypes
+X: 2-d array of (rotated) covariates
+lambda: 1-d array of eigenvalues
+reml: boolean indicating ML or REML estimation
+
+"""
+function flmm(y::Array{Float64,2},X::Array{Float64,2},lambda::Array{Float64,1},reml::Bool=false; h20::Float64=0.5,d::Float64=1.0)
+    function logLik0(h2::Float64)
+        out = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
+        return -out.ell
+    end
+
+    opt = optimize(logLik0,max(h20-d,0.0),min(h20+d,1.0))
+    h2 = opt.minimizer
+    est = wls(y,X,1.0./(h2*lambda.+(1.0-h2)),reml,true)
+    return Flmm(est.b,est.sigma2,h2,est.ell)
 end
-
-

@@ -1,6 +1,6 @@
 name = "FaSTLMM"
 uuid = "18d3ab0b-97fc-5e2b-aa05-5bdf3eee57bb"
-authors = ["Xiaoqi Hu <cuchxq@gmail.com>", "Saunak Sen <sen@uthsc.edu>"]
+authors = ["Chelsea Trotter <ctrotter@uthsc.edu>", "Saunak Sen <sen@uthsc.edu>"]
 version = "0.2.3"
 
 [deps]
@@ -15,4 +15,4 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-julia = "≥ 1.2"
+julia = "≥ 1.2" 
