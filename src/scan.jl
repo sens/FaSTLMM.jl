@@ -2,14 +2,6 @@
 # genome scan function; no covariates, two genotype groups
 ###########################################################
 
-using Distributed
-using Random
-using LinearAlgebra
-using SharedArrays
-
-include("lmm.jl")
-include("util.jl")
-
 
 function scan(y::Array{Float64,2},g::Array{Float64,2},
                    K::Array{Float64,2},reml::Bool,method::String="null")
@@ -72,7 +64,7 @@ function scan_alt(y::Array{Float64,2},g::Array{Float64,2},
     # fit null lmm
     # out00 = flmm(y0,X00,lambda0,reml)
     out00 = flmm(y0,X00,lambda0,10)
-    
+
 
     lod = zeros(m)
     X = zeros(n,2)
@@ -91,7 +83,7 @@ end
 ## genome scan with permutations
 ## no covariates
 ## one-df tests
-## with parallelization    
+## with parallelization
 function scan(y::Array{Float64,2},g::Array{Float64,2},
               K::Array{Float64,2},nperm::Int64=1024,
               nprocs::Int64=1,
@@ -101,7 +93,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     if(size(y,2)!=1)
         error("Can only handle one trait.")
     end
-        
+
     # number of markers
     (n,m) = size(g)
     # make intercept
@@ -122,13 +114,13 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
     rng = MersenneTwister(rndseed);
     r0perm = shuffleVector(rng,r0[:,1],nperm,true)
 
-    ## if the number of processes is negative or 0, set to 1    
+    ## if the number of processes is negative or 0, set to 1
     if(nprocs<=1)
         nprocs = 1
     end
 
-    # serial processing        
-    if(nprocs==1)        
+    # serial processing
+    if(nprocs==1)
         ## null rss vector
         rss0 = rss(r0perm,reshape(X0[:,1],n,1))
         rss1 = similar(rss0)
@@ -151,7 +143,7 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         if(Distributed.nprocs()<nprocs)
             addprocs(nprocs-Distributed.nprocs())
         end
-        # if number of processes desired is less than current    
+        # if number of processes desired is less than current
         if(Distributed.nprocs()>nprocs)
             wks = workers()
             rmprocs(wks[(nprocs+1):end])
@@ -160,14 +152,14 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
         rss0 = rss(r0perm,reshape(X0[:,1],n,1))
         X = zeros(n,2)
         X[:,1] = X0[:,1]
-        # send data to all processes    
+        # send data to all processes
         @everywhere rss0 = $rss0
         @everywhere r0perm = $r0perm
         @everywhere X0 = $X0
         @everywhere X = $X
         @everywhere include("../src/lmm.jl")
-        @everywhere include("../src/util.jl")           
-        @everywhere include("../src/wls.jl")                       
+        @everywhere include("../src/util.jl")
+        @everywhere include("../src/wls.jl")
 
         ## make array to hold LOD scores
         lod = SharedArray{Float64}((nperm+1,m))
@@ -178,9 +170,9 @@ function scan(y::Array{Float64,2},g::Array{Float64,2},
             lod[:,i] = (n/2)*(log10.(rss0) .-
                               log10.(rss(r0perm,X)))
         end
-            
+
     end
-        
+
     return lod
 
 end
@@ -234,6 +226,3 @@ function scan(y::Array{Float64,2},g::Array{Float64,3},
     return lod
 
 end
-
-
-

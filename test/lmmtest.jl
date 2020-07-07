@@ -34,7 +34,6 @@ for i = 1:size(pheno,2)
     y = Array{Float64}(undef,sum(whichKeep),1)
     y[:,1] = convert(Array{Float64,1},pheno[whichKeep,i]);
 
-
     # perform rotation
     (yy,XX,lambda) = rotateData(y,X[whichKeep,:],
                                 K[whichKeep,whichKeep])
@@ -42,6 +41,7 @@ for i = 1:size(pheno,2)
     out1 = flmm(yy,XX,lambda,true)
     res[2*i-1,:] = [out0.b; out0.sigma2; out0.h2; out0.ell; 0]
     res[2*i,:]   = [out1.b; out1.sigma2; out1.h2; out1.ell; 1]
+    
 end
 
 cnames =["b0" "b1" "sigma2" "h2" "loglik" "reml"];

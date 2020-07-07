@@ -3,15 +3,7 @@
 # no covariates, two genotype groups, no missing data
 ###########################################################
 
-using Distributed
-using Random
-using LinearAlgebra
-using SharedArrays
-using Optim
 
-include("scan.jl")
-include("util.jl")
-include("wls.jl")
 
 ################################################################
 # plain genome scan
@@ -37,7 +29,7 @@ function bulkscan(y::Array{Float64,2},g::Array{Float64,2},w::Vector{Float64})
     n = size(y,1)
     p = size(y,2)
     m = size(g0,2)
-    
+
     X0 = ones(n,1)
     y0=deepcopy(y)
     g0 = deepcopy(g)
@@ -67,7 +59,7 @@ function bulkscan(y::Array{Float64,2},g::Array{Float64,2},w::Vector{Float64})
             lod[i,j] = (n/2)*log10(b[i,j]^2/(rss0[i]*g0ss[j]))
         end
     end
-    
+
     return lod
 end
 
@@ -75,7 +67,7 @@ end
 function bulkls(y::Matrix{Float64},X::Matrix{Float64},loglik::Bool=false)
 
     n = size(y,1)
-    
+
     fct = qr(X)
     b = fct\y
     yhat = X*b
@@ -87,7 +79,7 @@ function bulkls(y::Matrix{Float64},X::Matrix{Float64},loglik::Bool=false)
     ell = -0.5 *. (logdetSigma +. rss./sigma2)
 
     return b, sigma2, ell
-    
+
 end
 
 # residual from least squares
@@ -95,14 +87,14 @@ end
 function bulkresid(y::Matrix{Float64},X::Matrix{Float64})
 
     n = size(y,1)
-    
+
     fct = qr(X)
     b = fct\y
     yhat = X*b
     resid = y-yhat
 
     return resid
-    
+
 end
 
 function bulkWls(y::Matrix{Float64},X::Matrix{Float64},
@@ -120,7 +112,7 @@ function bulkWls(y::Matrix{Float64},X::Matrix{Float64},
     (b,sigma2,ell) = bulkls(y0,X0,loglik)
      ell = ell + sum(log.(w))/2
 
-    return b,sigma2,ell    
+    return b,sigma2,ell
 end
 
 # estimate heritability
@@ -133,15 +125,15 @@ end
 
 function esth2_grid(y::Matrix{Float64},X::Matrix{Float64},
                     lambda::Vector{Float64},ngrid::Int64)
-    
+
     h2grid = (0:(ngrid-1)+0.5)/(ngrid)
     loglik = zeros(ngrid)
 
-    
+
     for i=1:ngrid
         wts = makeweights(h2grid[i],lambda)
         # rowScale!(y0,sqrt.(wts))
-        # rowScale!(X0,sqrt.(wts))        
+        # rowScale!(X0,sqrt.(wts))
         out = wls(y,X,1.0./wts,false,true)
         loglik[i] = out.ell
     end
@@ -156,7 +148,7 @@ function bulkesth2(y::Matrix{Float64},X::Matrix{Float64},
     p = size(y,2)
     h2 = zeros(p)
     Threads.@threads for i=1:p
-    # for i=1:p    
+    # for i=1:p
         h2[i] = esth2(reshape(y[:,i],:,1),X,lambda)
     end
     return h2
@@ -167,7 +159,7 @@ function bulkesth2_grid(y::Matrix{Float64},X::Matrix{Float64},
     p = size(y,2)
     h2 = zeros(p)
     Threads.@threads for i=1:p
-    # for i=1:p    
+    # for i=1:p
         h2[i] = esth2_grid(reshape(y[:,i],:,1),X,lambda,ngrid)
     end
     return h2
