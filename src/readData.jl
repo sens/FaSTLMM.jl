@@ -6,18 +6,14 @@
 # For now, we are reading in data from Pjotr Prin's format.  Other
 # formats will be included later, as needed.
 
-# using DataArrays
-
-using DelimitedFiles
-
 function readPheno(file::AbstractString,nSkip::Int64,
                    nPheno::Int64,nInd::Int64)
 
     # allocate space for phenotypes
     pheno = Array{Union{T, Missing}}(Float64,nInd,nPheno)
-    
+
     f = open(file,"r")
-        
+
     for i=1:nSkip
         aLine = readline(f)
     end
@@ -30,12 +26,12 @@ function readPheno(file::AbstractString,nSkip::Int64,
         end
     end
     close(f)
-        
+
     return pheno
 end
 
 
-#####################################################################        
+#####################################################################
 
 # function assumes that the first line is marker names, and the first
 # column is ids; both are strings
@@ -61,7 +57,7 @@ function readGenoProb(file::AbstractString;
         gd = d
     end
 
-    # get ids        
+    # get ids
     if(getids)
         ids = convert(Vector{String},gd[:,1])
         gp = convert(Matrix{Float64},gd[:,2:end])
@@ -70,26 +66,26 @@ function readGenoProb(file::AbstractString;
         gp = convert(Matrix{Float64},gd)
     end
 
-    # returns only genotype probabilities; others discarded for now    
+    # returns only genotype probabilities; others discarded for now
     return gp
 end
 
 
-    
-#####################################################################        
+
+#####################################################################
 function readGeno(file::AbstractString,nSkip::Int64,
                   nMarkers::Int64,nInd::Int64,format::AbstractString="HAB")
 
     # allocate space for marker names and genotypes
     mNames = Array{String,1}(undef, nMarkers)
     geno = Array{Float64,2}(undef, nInd,nMarkers)
-    
+
     if(format!="HAB")
         error("Cannot read this type of format.")
     end
 
     f = open(file,"r")
-        
+
     for i=1:nSkip
         aLine = readline(f)
     end
@@ -101,11 +97,11 @@ function readGeno(file::AbstractString,nSkip::Int64,
         geno[:,i] = word2array(words[2],nInd)
     end
     close(f)
-        
+
     return mNames, geno
 end
 
-#####################################################################    
+#####################################################################
 function word2array(word::SubString{String},wordLen::Int64)
     g = Array{Int64,1}(undef, wordLen)
     for i=1:wordLen
@@ -114,7 +110,7 @@ function word2array(word::SubString{String},wordLen::Int64)
     return g
 end
 
-#####################################################################    
+#####################################################################
 function f2code(x::Char)
     return if(x=='A')
              0
@@ -125,9 +121,9 @@ function f2code(x::Char)
            else
              NA
            end
-end        
+end
 
-#####################################################################    
+#####################################################################
 function str2num(x::SubString{String})
     n = tryparse(Float64,x)
     return isnull(n) ? NA : get(n)
@@ -147,34 +143,34 @@ end
 # end
 
 # function generate_x(x)
-#     # # Random create covariates for now. This for loop can be used for real data later. 
-#     # for row in 1:size(x)[1] 
+#     # # Random create covariates for now. This for loop can be used for real data later.
+#     # for row in 1:size(x)[1]
 #     #     if x[row] == "f"
 #     #         x[row] = 1.0
 #     #     else
 #     #         x[row] = -1.0
 #     #     end
 #     # end
-#     # return convert(Array{Float64,1}, x) 
+#     # return convert(Array{Float64,1}, x)
 
 #     return rand([-1.0,1.0], size(x)[1])
 # end
-    
+
 # function readBXDtraits(file::AbstractString)
 #     x_temp = readdlm(file, ','; skipstart=1)[:,end]
 #     return hcat(ones(size(X_temp)[1]),process_x(X_temp))
 # end
 
 function writeToFile(data, filename)
-    open(filename, "w") do io 
+    open(filename, "w") do io
         writedlm(io, data, ',')
-    end 
+    end
 end
 
 function transform_bxd_pheno_to_gemma(inputfile::AbstractString, outputfile::AbstractString, iter::Int64)
     pheno = readdlm(inputfile, ',', skipstart=1)[:, 2:end-1];
     open(outputfile,"w") do io
-        writedlm(io, pheno[:,iter])       
+        writedlm(io, pheno[:,iter])
     end
 end
 

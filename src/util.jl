@@ -2,8 +2,7 @@
 # utility functions
 ###################################
 
-using Statistics
-using Random
+
 # using DataStructures
 
 # centers each column
@@ -11,9 +10,9 @@ function colCenter!(A::Matrix{Float64})
 
     (n,m) = size(A)
 
-    # get mean of each column; convert to vector    
+    # get mean of each column; convert to vector
     colMeans = mean(A,dims=1) |> vec
-        
+
     for i=1:n
         for j=1:m
             A[i,j] = A[i,j] - colMeans[j]
@@ -26,9 +25,9 @@ function rowCenter!(A::Matrix{Float64})
 
     (n,m) = size(A)
 
-    # get mean of each column; convert to vector    
+    # get mean of each column; convert to vector
     rowMeans = mean(A,dims=2) |> vec
-        
+
     for i=1:m
         for j=1:n
             A[j,i] = A[j,i] - rowMeans[j]
@@ -55,9 +54,9 @@ function colStandardize!(A::Matrix{Float64})
     colCenter!(A)
     s = std(A,dims=1) |> vec
     colDivide!(A,s)
-    
+
 end
-    
+
 function rowDivide!(A::Matrix{Float64},x::Vector{Float64})
 
     (n,m) = size(A)
@@ -99,22 +98,19 @@ function compareValues(x_true::Array{Float64,1}, x::Array{Float64,1}, tolerance:
         if e <= tolerance
             passes[i] = true
         end
-        
+
         if x[i] >= threshold
-            if e <= tolerance 
+            if e <= tolerance
                 push!(t_passes, true)
             else
                 push!(t_passes,false)
             end
         end
-        
+
     end
     # pass_rate = sum(passes) / size(x_true)[1]
     # pass_rate = sum(t_passes) / size(t_passes)[1]
-    
+
     return (sum(passes), size(t_passes)[1], sum(t_passes))
 
 end
-
-
-

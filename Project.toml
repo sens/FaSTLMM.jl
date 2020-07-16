@@ -1,14 +1,18 @@
 name = "FaSTLMM"
 uuid = "18d3ab0b-97fc-5e2b-aa05-5bdf3eee57bb"
-authors = ["Xiaoqi Hu <cuchxq@gmail.com>","Saunak Sen <sen@uthsc.edu>"]
+authors = ["Chelsea Trotter <ctrotter@uthsc.edu>", "Saunak Sen <sen@uthsc.edu>"]
 version = "0.2.3"
 
-[compat]
-julia = "≥ 1.2"
-
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Missings = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "≥ 1.2" 

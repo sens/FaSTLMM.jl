@@ -1,4 +1,3 @@
-using DataFrames
 
 function runtime(funlist,n)
     # number of functions to be compared
@@ -23,4 +22,3 @@ function runtime(funlist,n)
 
     return elapsedTimes, medianTimes
 end
-
