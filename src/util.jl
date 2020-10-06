@@ -77,10 +77,17 @@ the first column is the original vector if original=true
 """
 function shuffleVector(rng::AbstractRNG,x::Vector{Float64},
                  nshuffle::Int64,original::Bool=true)
-    xx = zeros(length(x),nshuffle+1)
-    xx[:,1] = x
+    if(original)
+        xx = zeros(length(x),nshuffle+1)
+        xx[:,1] = x
+        istart = 1
+    else
+        xx = zeros(length(x),nshuffle+1)
+        istart = 0
+    end
+
     for i=1:nshuffle
-        xx[:,i+1] = shuffle(rng,x)
+        xx[:,i+istart] = shuffle(rng,x)
     end
 
     return xx
