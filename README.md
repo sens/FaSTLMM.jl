@@ -6,7 +6,9 @@ Genetic analysis in structured populations used mixed linear models
 where the variance matrix of the error term is a linear combination of
 an identity matrix and a positive definite matrix.
 
-The linear model is of the familiar form: $$y = X \beta + e$$
+The linear model is of the familiar form: 
+
+<img src="https://render.githubusercontent.com/render/math?math={y = X \beta + e}">
 
 - $y$: phenotype
 - $X$: covariates
