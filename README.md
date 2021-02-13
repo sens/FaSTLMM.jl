@@ -6,16 +6,14 @@ Genetic analysis in structured populations used mixed linear models
 where the variance matrix of the error term is a linear combination of
 an identity matrix and a positive definite matrix.
 
-The linear model is of the familiar form: 
+The linear model is of the familiar form: <img src="https://render.githubusercontent.com/render/math?math={y = X \beta {+} e}">
 
-<img src="https://render.githubusercontent.com/render/math?math={y = X \beta + e}">
-
-- $y$: phenotype
+-  y: phenotype
 - $X$: covariates
 - $\beta$: fixed effects
 - $e$: error term
 
- Further $V(e) = \sigma_G^2 K + \sigma_E^2 I$, where $\sigma_G^2$ is
+ Further <img src="https://render.githubusercontent.com/render/math?math={V(e) = \sigma_G^2 K + \sigma_E^2 I}">, where $\sigma_G^2$ is
  the genetic variance, $\sigma_E^2$ is the environmental variance, $K$
  is the kinship matrix, and $I$ is the identity matrix.
 
