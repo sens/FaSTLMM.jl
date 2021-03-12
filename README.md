@@ -6,16 +6,16 @@ Genetic analysis in structured populations used mixed linear models
 where the variance matrix of the error term is a linear combination of
 an identity matrix and a positive definite matrix.
 
-The linear model is of the familiar form: <img src="https://render.githubusercontent.com/render/math?math={y = X \beta {+} e}">
+The linear model is of the familiar form: 𝑦 = 𝑋 β + ϵ.
 
--  y: phenotype
-- $X$: covariates
-- $\beta$: fixed effects
-- $e$: error term
+- 𝑦: phenotype
+-𝑋: covariates
+- β: fixed effects
+- ϵ: error term
 
- Further <img src="https://render.githubusercontent.com/render/math?math={V(e) = \sigma_G^2 K + \sigma_E^2 I}">, where $\sigma_G^2$ is
- the genetic variance, $\sigma_E^2$ is the environmental variance, $K$
- is the kinship matrix, and $I$ is the identity matrix.
+Further, V(ϵ) = τ²𝐾+ σ²𝐼, where τ² is
+the genetic variance, σ² is the environmental variance, 𝐾
+is the kinship matrix, and 𝐼 is the identity matrix.
 
 The key idea in speeding up computations here is that by rotating the
 phenotypes by the eigenvectors of $K$ we can transform estimation to a
