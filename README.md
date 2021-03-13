@@ -9,7 +9,7 @@ an identity matrix and a positive definite matrix.
 The linear model is of the familiar form: 𝑦 = 𝑋 β + ϵ.
 
 - 𝑦: phenotype
--𝑋: covariates
+- 𝑋: covariates
 - β: fixed effects
 - ϵ: error term
 
@@ -18,11 +18,10 @@ the genetic variance, σ² is the environmental variance, 𝐾
 is the kinship matrix, and 𝐼 is the identity matrix.
 
 The key idea in speeding up computations here is that by rotating the
-phenotypes by the eigenvectors of $K$ we can transform estimation to a
+phenotypes by the eigenvectors of 𝐾 we can transform estimation to a
 weighted least squares problem.
 
-This implementation is my attempt to learn Julia and numerical linear
-algebra.  The code is being tested.
+This code is under development.
 
 Guide to the directories:
 
